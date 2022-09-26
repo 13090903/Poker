@@ -1,4 +1,4 @@
-package ru.vsu.csf.poker;
+package ru.vsu.csf.poker.enums;
 
 public enum Rank {
     TWO (2, "2"),

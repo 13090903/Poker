@@ -1,8 +1,11 @@
-package ru.vsu.csf.poker;
+package ru.vsu.csf.poker.model;
+
+import ru.vsu.csf.poker.enums.Rank;
+import ru.vsu.csf.poker.enums.Suit;
 
 public class Card {
-    private Rank rank;
-    private Suit suit;
+    protected Rank rank;
+    protected Suit suit;
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
@@ -27,9 +30,6 @@ public class Card {
 
     @Override
     public String toString() {
-        return "Card{" +
-                "rank=" + rank +
-                ", suit=" + suit +
-                '}';
+        return  rank + "" + suit;
     }
 }

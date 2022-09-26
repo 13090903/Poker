@@ -1,9 +1,9 @@
-package ru.vsu.csf.poker;
+package ru.vsu.csf.poker.model;
 
 public class Main {
     public static void main(String[] args) {
-        Deck d = new Deck();
-        d.initDeck();
-        System.out.println(d.deck);
+        Player[] players = {new Player("Dima", 5000), new Player("Bot", 5000)};
+        Deck deck = new Deck();
+        Game.game(players, deck);
     }
 }

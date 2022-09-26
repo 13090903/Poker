@@ -1,4 +1,7 @@
-package ru.vsu.csf.poker;
+package ru.vsu.csf.poker.model;
+
+import ru.vsu.csf.poker.enums.Rank;
+import ru.vsu.csf.poker.enums.Suit;
 
 import java.util.ArrayList;
 import java.util.List;

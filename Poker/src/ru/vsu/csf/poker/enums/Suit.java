@@ -1,10 +1,10 @@
 package ru.vsu.csf.poker.enums;
 
 public enum Suit {
-    DIAMONDS ("♦"),
-    HEARTS ("♥"),
-    SPADES ("♠"),
-    CLUBS ("♣");
+    DIAMONDS("♦"),
+    HEARTS("♥"),
+    SPADES("♠"),
+    CLUBS("♣");
 
     private final String pic;
 

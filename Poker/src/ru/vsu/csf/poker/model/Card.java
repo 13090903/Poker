@@ -4,8 +4,8 @@ import ru.vsu.csf.poker.enums.Rank;
 import ru.vsu.csf.poker.enums.Suit;
 
 public class Card {
-    protected Rank rank;
-    protected Suit suit;
+    private Rank rank;
+    private Suit suit;
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
@@ -30,6 +30,6 @@ public class Card {
 
     @Override
     public String toString() {
-        return  rank + "" + suit;
+        return rank + "" + suit;
     }
 }

@@ -13,6 +13,8 @@ public class Game {
 
     protected static int bank = 0;
     protected static int currentBet = 0;
+    protected Table table;
+    private WinnerDeterminator wd;
 
     public static int getBank() {
         return bank;
@@ -41,12 +43,11 @@ public class Game {
     }
 
 
-    public static void oneRound(Player[] players, Deck deck) {
-        Card[] table = new Card[5];
+    public void oneRound(Player[] players, Deck deck, Table table) {
         int cardsCounter = 52;
         for (Player player : players) {
             player.state = PlayerState.DEFAULT;
-            CardGeneration.generateHand(player, cardsCounter, deck);
+            player.generateHand(cardsCounter, deck);
             cardsCounter -= 2;
         }
 
@@ -65,9 +66,9 @@ public class Game {
 
         boolean allIn = bankrupts(players) > 0;
 
-        CardGeneration.generateThreeCards(table, cardsCounter, deck);
+        table.generateThreeCards(cardsCounter, deck);
         cardsCounter -= 3;
-        System.out.println(Arrays.toString(table));
+        System.out.println(Arrays.toString(table.table));
 
         if (!allIn) {
             if (bettingCircle(players, 2) == 1) {// Второе определение ставки, после чего достется 4 карта
@@ -82,9 +83,9 @@ public class Game {
             currentBet = 0;
         }
 
-        CardGeneration.generateOneCard(table, cardsCounter, 4, deck);
+        table.generateOneCard(cardsCounter, 4, deck);
         cardsCounter -= 1;
-        System.out.println(Arrays.toString(table));
+        System.out.println(Arrays.toString(table.table));
 
         if (bankrupts(players) > 0) {
             allIn = true;
@@ -102,8 +103,8 @@ public class Game {
             currentBet = 0;
         }
 
-        CardGeneration.generateOneCard(table, cardsCounter, 5, deck);
-        System.out.println(Arrays.toString(table));
+        table.generateOneCard(cardsCounter, 5, deck);
+        System.out.println(Arrays.toString(table.table));
 
         if (bankrupts(players) > 0) {
             allIn = true;
@@ -122,11 +123,12 @@ public class Game {
         }
 
 
-        System.out.println(Arrays.toString(table));
+        System.out.println(Arrays.toString(table.table));
 
         System.out.println("Opening up!");
 
-        Player[] winners = WinnerDetermination.determineTheWinner(players, table);
+        wd = new WinnerDeterminator(players);
+        Player[] winners = wd.determineTheWinner();
         System.out.print("Winner: ");
         for (Player player : players) {
             for (int i = 0; i < winners.length; i++) {
@@ -147,7 +149,10 @@ public class Game {
         System.out.println(Arrays.toString(players));
     }
 
-    public static void gameSimulation(Player[] players, Deck deck) {
+    public void gameSimulation() {
+        Deck deck = new Deck();
+        Table table = new Table();
+        Player[] players = new Player[]{new Player("Dima", 5000, table), new Player("Bot", 3000, table)};
         System.out.println("Enter play or stop: ");
         String dec = scanner.next();
         while (!dec.equals("stop")) {
@@ -156,7 +161,7 @@ public class Game {
                     System.out.println("Game is end! Somebody haven't got money \n" + Arrays.toString(players));
                     return;
                 }
-                oneRound(players, deck);
+                oneRound(players, deck, table);
                 bank = 0;
                 currentBet = 0;
                 Decisions.setAmountOfFolds(0);

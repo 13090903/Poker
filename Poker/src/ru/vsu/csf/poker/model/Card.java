@@ -4,8 +4,8 @@ import ru.vsu.csf.poker.enums.Rank;
 import ru.vsu.csf.poker.enums.Suit;
 
 public class Card {
-    private Rank rank;
-    private Suit suit;
+    private final Rank rank;
+    private final Suit suit;
 
     public Card(Rank rank, Suit suit) {
         this.rank = rank;
@@ -16,16 +16,8 @@ public class Card {
         return rank;
     }
 
-    public void setRank(Rank rank) {
-        this.rank = rank;
-    }
-
     public Suit getSuit() {
         return suit;
-    }
-
-    public void setSuit(Suit suit) {
-        this.suit = suit;
     }
 
     @Override

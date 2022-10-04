@@ -1,61 +1,72 @@
 package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.PlayerState;
+import ru.vsu.csf.poker.model.interfaces.PlayerActions;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class Player implements PlayerActions, Comparable<Player>{
+    private final Random rnd = new Random();
     protected String name;
     protected int cash;
     protected int bet;
-    protected int totalBet;
 
     protected PlayerState state;
     protected CombinationPlusHighCard combination;
     protected Card[] hand;
+    private final Table table;
+    private final CombinationDeterminator cd = new CombinationDeterminator();
 
-    public Player(String name, int cash) {
+    public Player(String name, int cash, Table table) {
         this.name = name;
         this.cash = cash;
+        this.table = table;
     }
 
     @Override
     public void fold() {
         state = PlayerState.FOLD;
-        Game.bank += bet;
+        table.setBank(table.getBank() + bet);
         cash -= bet;
         bet = 0;
     }
 
     @Override
     public void call() {
-        bet = Game.getCurrentBet();
+        bet = table.getCurrentBet();
     }
 
     public void blind() {
         bet = 100;
-        Game.setCurrentBet(bet);
-        totalBet += bet;
+        table.setCurrentBet(bet);
     }
 
     @Override
     public void raise(int newBet) {
-        Game.setCurrentBet(newBet);
+        table.setCurrentBet(newBet);
         bet = newBet;
     }
 
     @Override
     public void check() {
-        totalBet += bet;
         state = PlayerState.CHECK;
     }
 
-    public CombinationPlusHighCard getCombination() {
-        return combination;
+    public void checkCombination() {
+        cd.checkCombination(this, table);
+        combination = cd.getPlayerCombination();
     }
 
-    public void setCombination(CombinationPlusHighCard combination) {
-        this.combination = combination;
+    public void generateHand(int cardsCounter, Deck deck) { // Сгенерировать 2 карты игрока
+        Card[] hand = new Card[2];
+        int num = rnd.nextInt(cardsCounter);
+        hand[0] = deck.deck.get(num);
+        deck.deck.remove(num);
+        num = rnd.nextInt(cardsCounter - 1);
+        hand[1] = deck.deck.get(num);
+        deck.deck.remove(num);
+        this.setHand(hand);
     }
 
     public int getCash() {
@@ -88,14 +99,6 @@ public class Player implements PlayerActions, Comparable<Player>{
 
     public void setBet(int bet) {
         this.bet = bet;
-    }
-
-    public int getTotalBet() {
-        return totalBet;
-    }
-
-    public void setTotalBet(int totalBet) {
-        this.totalBet = totalBet;
     }
 
     @Override

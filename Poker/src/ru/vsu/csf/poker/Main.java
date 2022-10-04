@@ -1,13 +1,19 @@
 package ru.vsu.csf.poker;
 
-import ru.vsu.csf.poker.model.Deck;
-import ru.vsu.csf.poker.model.Game;
-import ru.vsu.csf.poker.model.Player;
+import ru.vsu.csf.poker.model.TextGame;
+
+import java.util.Scanner;
 
 public class Main {
+
+    public static Scanner scanner = new Scanner(System.in);
+
     public static void main(String[] args) {
-        Player[] players = {new Player("Dima", 5000), new Player("Bot", 3000)};
-        Deck deck = new Deck();
-        Game.gameSimulation(players, deck);
+        System.out.println("Чтобы запустить конслольное приложение введите - 1, графическое - 2");
+        String type = scanner.next();
+        if (type.equals("1")) {
+            TextGame game = new TextGame();
+            game.gameSimulation();
+        }
     }
 }

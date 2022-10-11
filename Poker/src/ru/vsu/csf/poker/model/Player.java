@@ -54,7 +54,7 @@ public class Player implements PlayerActions, Comparable<Player>{
     }
 
     public void checkCombination() {
-        combination = cd.checkCombination(this);
+        combination = cd.getCombination(this);
     }
 
     public void generateHand(Deck deck) { // Сгенерировать 2 карты игрока

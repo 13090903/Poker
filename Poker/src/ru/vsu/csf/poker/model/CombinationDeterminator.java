@@ -9,7 +9,7 @@ import java.util.Objects;
 
 public class CombinationDeterminator {
 
-    public CombinationPlusHighCard checkCombination(Player player) {
+    public CombinationPlusHighCard getCombination(Player player) {
         CombinationPlusHighCard playerCombination;
         Table table = player.getTable();
         Map<Integer, Integer> rankMap = new HashMap<>(); // Ключ - ранг, значение - количество

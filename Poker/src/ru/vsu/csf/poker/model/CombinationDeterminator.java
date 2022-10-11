@@ -9,9 +9,9 @@ import java.util.Objects;
 
 public class CombinationDeterminator {
 
-    private CombinationPlusHighCard playerCombination;
-
-    public void checkCombination(Player player, Table table) {
+    public CombinationPlusHighCard checkCombination(Player player) {
+        CombinationPlusHighCard playerCombination;
+        Table table = player.getTable();
         Map<Integer, Integer> rankMap = new HashMap<>(); // Ключ - ранг, значение - количество
         Map<Suit, Integer> suitMap = new HashMap<>(); // Ключ - масть, значение - количество
         Map<Integer, Suit> rankSuitMap = new HashMap<>(); // Ключ - ранг, значение - масть
@@ -24,54 +24,55 @@ public class CombinationDeterminator {
 
         if (Objects.equals(isRoyalFlush(rankMap, suitMap, rankSuitMap), Combinations.ROYAL_FLUSH)) {
             playerCombination = new CombinationPlusHighCard(Combinations.ROYAL_FLUSH, 14);
-            return;
+            return playerCombination;
         }
 
         CombinationPlusHighCard straightFlush = isStraightFlush(rankMap, suitMap, rankSuitMap);
         if (straightFlush.combination.equals(Combinations.STRAIGHT_FLUSH)) {
             playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, straightFlush.highCard);
-            return;
+            return playerCombination;
         }
 
         CombinationPlusHighCard multiplicityCombo = multiplicityOfCards(rankMap);
         if (multiplicityCombo.combination.equals(Combinations.FOUR_OF_A_KIND)) {
             playerCombination = new CombinationPlusHighCard(Combinations.FOUR_OF_A_KIND, multiplicityCombo.highCard);
-            return;
+            return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.FULL_HOUSE)) {
             playerCombination = new CombinationPlusHighCard(Combinations.FULL_HOUSE, multiplicityCombo.highCard);
-            return;
+            return playerCombination;
         }
 
         CombinationPlusHighCard flush = isFlush(suitMap, rankSuitMap);
         if (flush.combination.equals(Combinations.FLUSH)) {
             playerCombination = new CombinationPlusHighCard(Combinations.FLUSH, flush.highCard);
-            return;
+            return playerCombination;
         }
 
         CombinationPlusHighCard straight = isStraight(rankMap);
         if (straight.combination.equals(Combinations.STRAIGHT)) {
             playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT, straight.highCard);
-            return;
+            return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.THREE_OF_A_KIND)) {
             playerCombination = new CombinationPlusHighCard(Combinations.THREE_OF_A_KIND, multiplicityCombo.highCard);
-            return;
+            return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.TWO_PAIRS)) {
             playerCombination = new CombinationPlusHighCard(Combinations.TWO_PAIRS, multiplicityCombo.highCard);
-            return;
+            return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.PAIR)) {
             playerCombination = new CombinationPlusHighCard(Combinations.PAIR, multiplicityCombo.highCard);
-            return;
+            return playerCombination;
         }
 
         playerCombination = new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard(rankMap));
+        return playerCombination;
     }
 
     private void FillMaps(Map<Integer, Integer> rankMap, Map<Suit, Integer> suitMap, Map<Integer, Suit> rankSuitMap, Card card) {
@@ -276,9 +277,5 @@ public class CombinationDeterminator {
             highestCardStrength = entry.getKey();
         }
         return highestCardStrength;
-    }
-
-    public CombinationPlusHighCard getPlayerCombination() {
-        return playerCombination;
     }
 }

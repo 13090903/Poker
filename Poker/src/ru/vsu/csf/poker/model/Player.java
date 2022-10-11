@@ -54,12 +54,12 @@ public class Player implements PlayerActions, Comparable<Player>{
     }
 
     public void checkCombination() {
-        cd.checkCombination(this, table);
-        combination = cd.getPlayerCombination();
+        combination = cd.checkCombination(this);
     }
 
-    public void generateHand(int cardsCounter, Deck deck) { // Сгенерировать 2 карты игрока
+    public void generateHand(Deck deck) { // Сгенерировать 2 карты игрока
         Card[] hand = new Card[2];
+        int cardsCounter = deck.deck.size();
         int num = rnd.nextInt(cardsCounter);
         hand[0] = deck.deck.get(num);
         deck.deck.remove(num);
@@ -99,6 +99,10 @@ public class Player implements PlayerActions, Comparable<Player>{
 
     public void setBet(int bet) {
         this.bet = bet;
+    }
+
+    public Table getTable() {
+        return table;
     }
 
     @Override

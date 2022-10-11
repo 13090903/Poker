@@ -1,6 +1,6 @@
 package ru.vsu.csf.poker;
 
-import ru.vsu.csf.poker.model.TextGame;
+import ru.vsu.csf.poker.model.Game;
 
 import java.util.Scanner;
 
@@ -12,8 +12,8 @@ public class Main {
         System.out.println("Чтобы запустить конслольное приложение введите - 1, графическое - 2");
         String type = scanner.next();
         if (type.equals("1")) {
-            TextGame game = new TextGame();
-            game.gameSimulation();
+            Game game = new Game();
+            game.gameSimulation("I", 5000, 1);
         }
     }
 }

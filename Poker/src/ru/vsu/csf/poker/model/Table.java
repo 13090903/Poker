@@ -13,23 +13,16 @@ public class Table implements CardGeneration {
     private int currentBet = 0;
 
     @Override
-    public void generateThreeCards(int cardsCounter, Deck deck) { // Сгенерировать 3 карты на столе
-        int num = rnd.nextInt(cardsCounter);
-        table[0] = deck.deck.get(num);
-        deck.deck.remove(num);
-        num = rnd.nextInt(cardsCounter - 1);
-        table[1] = deck.deck.get(num);
-        deck.deck.remove(num);
-        num = rnd.nextInt(cardsCounter - 2);
-        table[2] = deck.deck.get(num);
-        deck.deck.remove(num);
-    }
-
-    @Override
-    public void generateOneCard(int cardsCounter, int cardNum, Deck deck) { // Сгенерировать 1 карту на столе
-        int num = rnd.nextInt(cardsCounter);
-        table[cardNum - 1] = deck.deck.get(num);
-        deck.deck.remove(num);
+    public Card[] generateCards(Deck deck, int cardAmount) { // Сгенерировать 3 карты на столе
+        int cardsCounter = deck.deck.size();
+        int num;
+        Card[] generatedCards = new Card[cardAmount];
+        for (int i = 0; i < cardAmount; i++) {
+            num = rnd.nextInt(cardsCounter - i);
+            generatedCards[i] = deck.deck.get(num);
+            deck.deck.remove(num);
+        }
+        return generatedCards;
     }
 
     public int getBank() {

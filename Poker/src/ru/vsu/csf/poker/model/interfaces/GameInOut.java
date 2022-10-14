@@ -5,9 +5,9 @@ import ru.vsu.csf.poker.model.Table;
 
 public interface GameInOut {
 
-    void oneBet(Player[] players, int i, Table table);
+    void oneBet(Player[] players, int i);
 
-    void botsDecisions(Player[] players, int i, Table table);
+    void botsDecisions(Player[] players, int i);
 
-    void playerDecisions(Player[] players, int i, Table table);
+    void playerDecisions(Player[] players, int i);
 }

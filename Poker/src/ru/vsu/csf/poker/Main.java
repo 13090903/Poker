@@ -13,7 +13,7 @@ public class Main {
         String type = scanner.next();
         if (type.equals("1")) {
             Game game = new Game();
-            game.gameSimulation("I", 5000, 1);
+            game.gameSimulation("I", 5000, 1, true);
         }
     }
 }

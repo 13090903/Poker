@@ -1,5 +1,6 @@
 package ru.vsu.csf.poker.model;
 
+import ru.vsu.csf.poker.enums.GameStages;
 import ru.vsu.csf.poker.enums.PlayerState;
 import ru.vsu.csf.poker.model.interfaces.GameInOut;
 
@@ -13,7 +14,8 @@ public class DecisionMaker implements GameInOut {
     protected int amountOfFolds = 0;
 
     @Override
-    public void botsDecisions(Player[] players, int i, Table table) {// Все решения, принимаемые ботами
+    public void botsDecisions(Player[] players, int i) {// Все решения, принимаемые ботами
+        Table table = players[0].getTable();
         if (players[i].getState().equals(PlayerState.FOLD)) {
             return;
         }
@@ -50,7 +52,8 @@ public class DecisionMaker implements GameInOut {
     }
 
     @Override
-    public void oneBet(Player[] players, int i, Table table) {// Первая ставка перед каждым открытием карт (Можно заменить на блайнды)
+    public void oneBet(Player[] players, int i) {// Первая ставка перед каждым открытием карт (Можно заменить на блайнды)
+        Table table = players[0].getTable();
         System.out.println(players[i]);
         System.out.print("Use blind - blind, raise - raise or fold - fold\n");
         String blind = scanner.next();
@@ -101,7 +104,8 @@ public class DecisionMaker implements GameInOut {
     }
 
     @Override
-    public void playerDecisions(Player[] players, int i, Table table) {// Решения игрока, за которого мы играем
+    public void playerDecisions(Player[] players, int i) {// Решения игрока, за которого мы играем
+        Table table = players[0].getTable();
         System.out.println("Enter your decision: ");
         String dec = scanner.next();
         switch (dec) {
@@ -215,15 +219,15 @@ public class DecisionMaker implements GameInOut {
         }
         return true;
     }
-        public int bettingCircle(Player[] players, int circleNumber, Table table) { // Один ставочный круг
+        public int bettingCircle(Player[] players, GameStages stage, Table table) { // Один ставочный круг
         boolean flag = false;
         while (!betIsTheSame(players) || !everybodyChecks(players)) {
             if (everybodyAllIn(players)) {
                 break;
             }
             for (int i = 0; i < players.length; i++) {
-                if (i == 0 && table.getCurrentBet() == 0 && circleNumber == 1) {
-                    oneBet(players, i, table);
+                if (i == 0 && table.getCurrentBet() == 0 && stage.getNum() == 1) {
+                    oneBet(players, i);
                 }
 
                 if (endGameConditions(players)) {
@@ -231,7 +235,7 @@ public class DecisionMaker implements GameInOut {
                 }
 
                 if (i > 0) {
-                    botsDecisions(players, i, table);
+                    botsDecisions(players, i);
                     flag = true;
                 }
 
@@ -240,7 +244,7 @@ public class DecisionMaker implements GameInOut {
                 }
 
                 if (i == 0 && flag) {
-                    playerDecisions(players, i, table);
+                    playerDecisions(players, i);
                 }
 
                 if (endGameConditions(players)) {

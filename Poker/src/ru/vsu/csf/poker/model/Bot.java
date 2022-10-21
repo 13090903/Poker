@@ -12,6 +12,7 @@ public class Bot extends Player {
         super(name, cash, table);
     }
 
+    @Override
     public void move() {
         int randomInt = rnd.nextInt(50);
         Move move = null;

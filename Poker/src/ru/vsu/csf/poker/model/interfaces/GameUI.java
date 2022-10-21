@@ -5,7 +5,7 @@ import ru.vsu.csf.poker.model.Move;
 public interface GameUI {
     default Move prompt(String message) {
         showMessage(message);
-        return null;
+        return prompt();
     }
 
     Move prompt();

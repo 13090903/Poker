@@ -63,6 +63,7 @@ public class Player implements PlayerActions, Comparable<Player> {
         }
     }
 
+
     @Override
     public void check() {
         state = PlayerState.CHECK;
@@ -70,7 +71,11 @@ public class Player implements PlayerActions, Comparable<Player> {
 
     public void move() {
         ui.showGameState(bet, table.getCurrentBet(), table.getBank());
-        Move move = ui.prompt();
+        Move move = ui.prompt("Your turn: ");
+        while (move == null) {
+            move = ui.prompt("Invalid input, try again");
+        }
+
         switch (move.getMoveType()) {
             case CALL -> {
                 if (bet < table.getCurrentBet() || bet > table.getCurrentBet()) {

@@ -16,12 +16,12 @@ public class ConsoleGameUI implements GameUI {
 
     public ConsoleGameUI(InputStream in, OutputStream out) {
         this.in = new Scanner(in);
-        this.out = new PrintWriter(out);
+        this.out = new PrintWriter(out, true);
     }
 
     @Override
     public Move prompt() {
-        showMessage("Your Turn: ");
+//        showMessage("Your Turn: ");
         String[] input = in.nextLine().split(" ");
         String typeStr = input[0];
         switch (typeStr) {
@@ -38,8 +38,6 @@ public class ConsoleGameUI implements GameUI {
                 return new Move(MoveType.RAISE, Integer.parseInt(input[1]));
             }
             default -> {
-                //todo обработка ошибок (ввод не соответсвует)
-//                return prompt();
                 return null;
             }
         }
@@ -48,7 +46,6 @@ public class ConsoleGameUI implements GameUI {
     @Override
     public void showMessage(String message) {
         out.println(message);
-        out.flush();
     }
 
     @Override
@@ -56,6 +53,5 @@ public class ConsoleGameUI implements GameUI {
         out.println("My bet: " + playerBet);
         out.println("Current bet: " + currBet);
         out.println("Bank: " + bank);
-        out.flush();
     }
 }

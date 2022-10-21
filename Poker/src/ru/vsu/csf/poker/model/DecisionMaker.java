@@ -2,11 +2,8 @@ package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.GameStages;
 import ru.vsu.csf.poker.enums.PlayerState;
-import ru.vsu.csf.poker.model.interfaces.GameInOut;
 
 import java.util.Arrays;
-import java.util.Random;
-import java.util.Scanner;
 
 public class DecisionMaker {
     //todo разделить на принятие решений и ввод вывод
@@ -63,19 +60,18 @@ public class DecisionMaker {
     }
 
     public int bettingCircle(Player[] players, GameStages stage, Table table) { // Один ставочный круг
-        boolean flag = false;
         while (!betIsTheSame(players) || !everybodyChecks(players)) {
             if (everybodyAllIn(players)) {
                 break;
             }
-            for (int i = 0; i < players.length; i++) {
-                if (players[i].getState().equals(PlayerState.FOLD)) {
+            for (Player player : players) {
+                if (player.getState().equals(PlayerState.FOLD)) {
                     continue;
                 }
                 if (endGameConditions(players)) {
                     return 1;
                 }
-                players[i].move();
+                player.move();
             }
         }
         for (Player player : players) {

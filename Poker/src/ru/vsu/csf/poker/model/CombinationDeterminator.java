@@ -8,10 +8,19 @@ import java.util.Map;
 import java.util.Objects;
 
 public class CombinationDeterminator {
+    //todo в конструктор игрока и стол
 
-    public CombinationPlusHighCard getCombination(Player player) {
+    private final Player player;
+    private Table table;
+
+    public CombinationDeterminator(Player player, Table table) {
+        this.player = player;
+        this.table = table;
+    }
+
+    public CombinationPlusHighCard getCombination() {
+        table = player.getTable();
         CombinationPlusHighCard playerCombination;
-        Table table = player.getTable();
         Map<Integer, Integer> rankMap = new HashMap<>(); // Ключ - ранг, значение - количество
         Map<Suit, Integer> suitMap = new HashMap<>(); // Ключ - масть, значение - количество
         Map<Integer, Suit> rankSuitMap = new HashMap<>(); // Ключ - ранг, значение - масть

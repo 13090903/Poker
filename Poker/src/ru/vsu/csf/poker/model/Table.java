@@ -1,5 +1,6 @@
 package ru.vsu.csf.poker.model;
 
+import ru.vsu.csf.poker.enums.GameStages;
 import ru.vsu.csf.poker.model.interfaces.CardGeneration;
 
 import java.util.Random;
@@ -11,13 +12,15 @@ public class Table implements CardGeneration {
 
     private int bank = 0;
     private int currentBet = 0;
+    protected int amountOfFolds = 0;
 
+    //todo private (соблюдение правил)
     @Override
-    public Card[] generateCards(Deck deck, int cardAmount) { // Сгенерировать 3 карты на столе
+    public Card[] generateCards(Deck deck, GameStages stage) {
         int cardsCounter = deck.deck.size();
         int num;
-        Card[] generatedCards = new Card[cardAmount];
-        for (int i = 0; i < cardAmount; i++) {
+        Card[] generatedCards = new Card[stage.getCardAmount()];
+        for (int i = 0; i < stage.getCardAmount(); i++) {
             num = rnd.nextInt(cardsCounter - i);
             generatedCards[i] = deck.deck.get(num);
             deck.deck.remove(num);

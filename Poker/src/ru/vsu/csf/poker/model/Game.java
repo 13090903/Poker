@@ -28,7 +28,7 @@ public class Game {
 
     public void displayText(String str, boolean isTextGame){
         if (isTextGame) {
-            System.out.println(str);
+            System.out.print(str);
         }
     }
 
@@ -38,7 +38,12 @@ public class Game {
             player.generateHand(deck);
         }
 
-        displayText("New game!", isTextGame);
+        displayText("New game!\n", isTextGame);
+
+        players[0].bet = 100;
+        table.setCurrentBet(100);
+
+        players[0].ui.showMessage("My cards " + Arrays.toString(players[0].getHand()));
 
         if (dm.bettingCircle(players, GameStages.FIRST, table) == 1) {// Первое определение ставки, после чего достаются 3 карты
             return;
@@ -53,8 +58,8 @@ public class Game {
 
         boolean allIn = bankrupts(players) > 0;
 
-        System.arraycopy(table.generateCards(deck, 3), 0, table.table, 0, 3);
-        displayText(Arrays.toString(table.table), isTextGame);
+        System.arraycopy(table.generateCards(deck, GameStages.FIRST), 0, table.table, 0, 3);
+        displayText(Arrays.toString(table.table) + "\n", isTextGame);
 
         if (!allIn) {
             if (dm.bettingCircle(players, GameStages.SECOND, table) == 1) {// Второе определение ставки, после чего достется 4 карта
@@ -69,9 +74,9 @@ public class Game {
             table.setCurrentBet(0);
         }
 
-        Card[] genCard1 = table.generateCards(deck, 1);
+        Card[] genCard1 = table.generateCards(deck, GameStages.SECOND);
         System.arraycopy(genCard1, 0, table.table, 3, 1);
-        displayText(Arrays.toString(table.table), isTextGame);
+        displayText(Arrays.toString(table.table) + "\n", isTextGame);
 
         if (bankrupts(players) > 0) {
             allIn = true;
@@ -89,9 +94,9 @@ public class Game {
             table.setCurrentBet(0);
         }
 
-        Card[] genCard2 = table.generateCards(deck, 1);
+        Card[] genCard2 = table.generateCards(deck, GameStages.THIRD);
         System.arraycopy(genCard2, 0, table.table, 4, 1);
-        displayText(Arrays.toString(table.table), isTextGame);
+        displayText(Arrays.toString(table.table) + "\n", isTextGame);
 
         if (bankrupts(players) > 0) {
             allIn = true;
@@ -110,9 +115,9 @@ public class Game {
         }
 
 
-        displayText(Arrays.toString(table.table), isTextGame);
+        displayText(Arrays.toString(table.table) + "\n", isTextGame);
 
-        displayText("Opening up!", isTextGame);
+        displayText("Opening up!\n", isTextGame);
 
         wd = new WinnerDeterminator(players);
         Player[] winners = wd.determineTheWinner();
@@ -131,18 +136,18 @@ public class Game {
             }
         }
 
-        displayText("with combination " + winners[0].combination.combination.toString(), isTextGame);
+        displayText("with combination " + winners[0].combination.combination.toString() + "\n", isTextGame);
 
-        displayText(Arrays.toString(players), isTextGame);
+        displayText(Arrays.toString(players) + "\n", isTextGame);
     }
 
-    public void gameSimulation(String playerName, int cash, int amountOfBots, boolean isTextGame) {
+    public void start(String playerName, int cash, int amountOfBots, boolean isTextGame) {
         Deck deck = new Deck();
         Table table = new Table();
         Player[] players = new Player[amountOfBots + 1];
-        players[0] = new Player(playerName, cash, table);
+        players[0] = new Player(playerName, cash, table, new ConsoleGameUI(System.in, System.out));
         for (int i = 1; i < players.length; i++) {
-            players[i] = new Player("Bot" + i, cash, table);
+            players[i] = new Bot("Bot" + i, cash, table);
         }
         displayText("Enter play or stop: ", isTextGame);
         String dec = "";
@@ -159,7 +164,7 @@ public class Game {
                 table.setBank(0);
                 table.setCurrentBet(0);
                 table.table = new Card[5];
-                dm.amountOfFolds = 0;
+                table.amountOfFolds = 0;
                 deck = new Deck();
                 for (Player player : players) {
                     player.combination = null;

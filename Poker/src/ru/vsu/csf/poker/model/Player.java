@@ -1,12 +1,13 @@
 package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.PlayerState;
+import ru.vsu.csf.poker.model.interfaces.GameUI;
 import ru.vsu.csf.poker.model.interfaces.PlayerActions;
 
 import java.util.Arrays;
 import java.util.Random;
 
-public class Player implements PlayerActions, Comparable<Player>{
+public class Player implements PlayerActions, Comparable<Player> {
     private final Random rnd = new Random();
     protected String name;
     protected int cash;
@@ -15,13 +16,19 @@ public class Player implements PlayerActions, Comparable<Player>{
     protected PlayerState state;
     protected CombinationPlusHighCard combination;
     protected Card[] hand;
-    private final Table table;
-    private final CombinationDeterminator cd = new CombinationDeterminator();
+    private Table table;
+    private final CombinationDeterminator cd = new CombinationDeterminator(this, this.table);
+    protected GameUI ui;
 
-    public Player(String name, int cash, Table table) {
+    public Player(String name, int cash, Table table, GameUI ui) {
         this.name = name;
         this.cash = cash;
         this.table = table;
+        this.ui = ui;
+    }
+
+    public Player(String name, int cash, Table table) {
+        this(name, cash, table, null);
     }
 
     @Override
@@ -44,8 +51,16 @@ public class Player implements PlayerActions, Comparable<Player>{
 
     @Override
     public void raise(int newBet) {
-        table.setCurrentBet(newBet);
-        bet = newBet;
+        if (cash < newBet) {
+            table.setCurrentBet(cash);
+            bet = cash;
+        } else if (newBet <= table.getCurrentBet()) {
+            table.setCurrentBet(bet + 100);
+            bet += 100;
+        } else {
+            table.setCurrentBet(newBet);
+            bet = newBet;
+        }
     }
 
     @Override
@@ -53,8 +68,47 @@ public class Player implements PlayerActions, Comparable<Player>{
         state = PlayerState.CHECK;
     }
 
+    public void move() {
+        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
+        Move move = ui.prompt();
+        switch (move.getMoveType()) {
+            case CALL -> {
+                if (bet < table.getCurrentBet() || bet > table.getCurrentBet()) {
+                    call();
+                } else {
+                    ui.showMessage("You don't need to call, your bet is current bet in game, so check");
+                    check();
+                }
+            }
+            case CHECK -> {
+                if (bet == table.getCurrentBet()) {
+                    check();
+                } else {
+                    ui.showMessage("You can't check, your bet isn't current bet in game, so call");
+                    call();
+                }
+            }
+            case FOLD -> {
+                fold();
+                table.amountOfFolds += 1;
+            }
+            case RAISE -> {
+                int newBet = move.getRaiseValue();
+                if (cash < newBet) {
+                    ui.showMessage("You haven't got enough cash, so you bet all");
+                    raise(cash);
+                } else if (newBet <= table.getCurrentBet()) {
+                    ui.showMessage("Bet is less than last, so raise for 100");
+                    raise(table.getCurrentBet() + 100);
+                }
+                raise(newBet);
+            }
+        }
+        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
+    }
+
     public void checkCombination() {
-        combination = cd.getCombination(this);
+        combination = cd.getCombination();
     }
 
     public void generateHand(Deck deck) { // Сгенерировать 2 карты игрока
@@ -112,10 +166,11 @@ public class Player implements PlayerActions, Comparable<Player>{
                 ", hand=" + Arrays.toString(hand) +
                 '}';
     }
+
     public int compareTo(Player p) {
-        int result =  this.combination.combination.compareTo(p.combination.combination);
+        int result = this.combination.combination.compareTo(p.combination.combination);
         if (result == 0) {
-            result =  p.combination.highCard.compareTo(this.combination.highCard);
+            result = p.combination.highCard.compareTo(this.combination.highCard);
         }
         return result;
     }

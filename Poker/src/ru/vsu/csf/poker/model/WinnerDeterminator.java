@@ -3,13 +3,14 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.PlayerState;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class WinnerDeterminator {
     private final Player[] players;
 
-    public WinnerDeterminator(Player[] players) {
-        this.players = players;
+    public WinnerDeterminator(List<Player> players) {
+        this.players = players.toArray(new Player[0]);
     }
 
     public Player[] determineTheWinner() {

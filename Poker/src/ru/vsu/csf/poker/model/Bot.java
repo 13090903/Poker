@@ -13,7 +13,7 @@ public class Bot extends Player {
     }
 
     @Override
-    public void move() {
+    public void makeMove() {
         int randomInt = rnd.nextInt(50);
         Move move = null;
         switch (randomInt) {

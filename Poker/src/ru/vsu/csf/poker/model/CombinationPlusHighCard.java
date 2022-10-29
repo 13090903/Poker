@@ -3,8 +3,9 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.Combinations;
 
 public class CombinationPlusHighCard{
-    public Combinations combination;
-    public Integer highCard;
+    protected Combinations combination;
+    protected Integer highCard;
+    protected Integer[] hcNotInComb;
 
     @Override
     public String toString() {
@@ -14,8 +15,9 @@ public class CombinationPlusHighCard{
                 '}';
     }
 
-    public CombinationPlusHighCard(Combinations combination, int highCard) {
+    public CombinationPlusHighCard(Combinations combination, int highCard, Integer[] hcNotInComb) {
         this.combination = combination;
         this.highCard = highCard;
+        this.hcNotInComb = hcNotInComb;
     }
 }

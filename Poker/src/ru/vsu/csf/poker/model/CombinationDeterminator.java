@@ -3,12 +3,12 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.Combinations;
 import ru.vsu.csf.poker.enums.Suit;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class CombinationDeterminator {
-    //todo в конструктор игрока и стол
 
     private final Player player;
     private Table table;
@@ -31,56 +31,58 @@ public class CombinationDeterminator {
             FillMaps(rankMap, suitMap, rankSuitMap, card);
         }// Заполнили словари
 
+        Integer[] hc = highCards(rankMap);
+
         if (Objects.equals(isRoyalFlush(rankMap, suitMap, rankSuitMap), Combinations.ROYAL_FLUSH)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.ROYAL_FLUSH, 14);
+            playerCombination = new CombinationPlusHighCard(Combinations.ROYAL_FLUSH, 14, hc);
             return playerCombination;
         }
 
         CombinationPlusHighCard straightFlush = isStraightFlush(rankMap, suitMap, rankSuitMap);
         if (straightFlush.combination.equals(Combinations.STRAIGHT_FLUSH)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, straightFlush.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, straightFlush.highCard, hc);
             return playerCombination;
         }
 
         CombinationPlusHighCard multiplicityCombo = multiplicityOfCards(rankMap);
         if (multiplicityCombo.combination.equals(Combinations.FOUR_OF_A_KIND)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.FOUR_OF_A_KIND, multiplicityCombo.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.FOUR_OF_A_KIND, multiplicityCombo.highCard, hc);
             return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.FULL_HOUSE)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.FULL_HOUSE, multiplicityCombo.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.FULL_HOUSE, multiplicityCombo.highCard, hc);
             return playerCombination;
         }
 
         CombinationPlusHighCard flush = isFlush(suitMap, rankSuitMap);
         if (flush.combination.equals(Combinations.FLUSH)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.FLUSH, flush.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.FLUSH, flush.highCard, hc);
             return playerCombination;
         }
 
         CombinationPlusHighCard straight = isStraight(rankMap);
         if (straight.combination.equals(Combinations.STRAIGHT)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT, straight.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.STRAIGHT, straight.highCard, hc);
             return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.THREE_OF_A_KIND)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.THREE_OF_A_KIND, multiplicityCombo.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.THREE_OF_A_KIND, multiplicityCombo.highCard, hc);
             return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.TWO_PAIRS)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.TWO_PAIRS, multiplicityCombo.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.TWO_PAIRS, multiplicityCombo.highCard, hc);
             return playerCombination;
         }
 
         if (multiplicityCombo.combination.equals(Combinations.PAIR)) {
-            playerCombination = new CombinationPlusHighCard(Combinations.PAIR, multiplicityCombo.highCard);
+            playerCombination = new CombinationPlusHighCard(Combinations.PAIR, multiplicityCombo.highCard, hc);
             return playerCombination;
         }
 
-        playerCombination = new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard(rankMap));
+        playerCombination = new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard(rankMap), hc);
         return playerCombination;
     }
 
@@ -122,8 +124,8 @@ public class CombinationDeterminator {
 
     private CombinationPlusHighCard isStraightFlush(Map<Integer, Integer> rankMap, Map<Suit, Integer> suitMap, Map<Integer, Suit> rankSuitMap) {
         int counterStraightCards = 1;
-        int[] rankOfComboCards = new int[7];// Какие карты образуют комбинацию, для определения старшей карты комбинации
-        int[] cardsRank = new int[7];
+        int[] rankOfComboCards = new int[rankMap.size()];// Какие карты образуют комбинацию, для определения старшей карты комбинации
+        int[] cardsRank = new int[rankMap.size()];
         int cardsDiff;
         int i = 0;
         int highCardIndex = 0;
@@ -159,7 +161,7 @@ public class CombinationDeterminator {
             for (int k = rankOfComboCards.length - 1; k >= 0; k--) {
                 if (rankOfComboCards[k] != 0) {
                     highCardIndex = k;
-                    return new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, rankOfComboCards[highCardIndex]);
+                    return new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, rankOfComboCards[highCardIndex], null);
                 }
             }
         }
@@ -170,9 +172,9 @@ public class CombinationDeterminator {
                     break;
                 }
             }
-            return new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, rankOfComboCards[highCardIndex]);
+            return new CombinationPlusHighCard(Combinations.STRAIGHT_FLUSH, rankOfComboCards[highCardIndex], null);
         }
-        return new CombinationPlusHighCard(Combinations.HIGH_CARD, cardsRank[cardsRank.length - 1]);
+        return new CombinationPlusHighCard(Combinations.HIGH_CARD, cardsRank[cardsRank.length - 1], null);
     }
 
     private CombinationPlusHighCard isFlush(Map<Suit, Integer> suitMap, Map<Integer, Suit> rankSuitMap) {
@@ -189,16 +191,16 @@ public class CombinationDeterminator {
             }
         }
         if (combinationSuit != null) {
-            return new CombinationPlusHighCard(Combinations.FLUSH, highCard);
+            return new CombinationPlusHighCard(Combinations.FLUSH, highCard, null);
         }
-        return new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard);
+        return new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard, null);
     }
 
     private CombinationPlusHighCard isStraight(Map<Integer, Integer> rankMap) {
         int counterStraightCards = 1;
         int highCardIndex = 0;
-        int[] cardsRank = new int[7];
-        int[] rankOfComboCards = new int[7];
+        int[] cardsRank = new int[rankMap.size()];
+        int[] rankOfComboCards = new int[rankMap.size()];
         int i = 0;
         int cardsDif;
         for (Map.Entry<Integer, Integer> entry : rankMap.entrySet()) {
@@ -224,7 +226,7 @@ public class CombinationDeterminator {
             for (int k = rankOfComboCards.length - 1; k > 0; k--) {
                 if (rankOfComboCards[k] != 0) {
                     highCardIndex = k;
-                    return new CombinationPlusHighCard(Combinations.STRAIGHT, rankOfComboCards[highCardIndex]);
+                    return new CombinationPlusHighCard(Combinations.STRAIGHT, rankOfComboCards[highCardIndex], null);
                 }
             }
         }
@@ -235,9 +237,9 @@ public class CombinationDeterminator {
                     break;
                 }
             }
-            return new CombinationPlusHighCard(Combinations.STRAIGHT, rankOfComboCards[highCardIndex]);
+            return new CombinationPlusHighCard(Combinations.STRAIGHT, rankOfComboCards[highCardIndex], null);
         }
-        return new CombinationPlusHighCard(Combinations.HIGH_CARD, cardsRank[cardsRank.length - 1]);
+        return new CombinationPlusHighCard(Combinations.HIGH_CARD, cardsRank[cardsRank.length - 1], null);
     }
 
     private CombinationPlusHighCard multiplicityOfCards(Map<Integer, Integer> rankMap) {
@@ -261,23 +263,23 @@ public class CombinationDeterminator {
             }
             if (entry.getValue() == 4) {
                 highCard = entry.getKey();
-                return new CombinationPlusHighCard(Combinations.FOUR_OF_A_KIND, highCard);
+                return new CombinationPlusHighCard(Combinations.FOUR_OF_A_KIND, highCard, null);
             }
             highCard = entry.getKey();
         }
         if (threeCardsCounter == 0 && pairsCounter == 1) {
-            return new CombinationPlusHighCard(Combinations.PAIR, highPairCard);
+            return new CombinationPlusHighCard(Combinations.PAIR, highPairCard, null);
         }
         if (threeCardsCounter == 0 && pairsCounter >= 2) {
-            return new CombinationPlusHighCard(Combinations.TWO_PAIRS, highPairCard);
+            return new CombinationPlusHighCard(Combinations.TWO_PAIRS, highPairCard, null);
         }
         if (threeCardsCounter >= 1 && pairsCounter == 0) {
-            return new CombinationPlusHighCard(Combinations.THREE_OF_A_KIND, highSetCard);
+            return new CombinationPlusHighCard(Combinations.THREE_OF_A_KIND, highSetCard, null);
         }
         if (threeCardsCounter == 1 && pairsCounter == 1) {
-            return new CombinationPlusHighCard(Combinations.FULL_HOUSE, highSetCard * 10 + highPairCard);
+            return new CombinationPlusHighCard(Combinations.FULL_HOUSE, highSetCard * 10 + highPairCard, null);
         }
-        return new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard);
+        return new CombinationPlusHighCard(Combinations.HIGH_CARD, highCard, null);
     }
 
     private int highCard(Map<Integer, Integer> rankMap) {
@@ -286,5 +288,23 @@ public class CombinationDeterminator {
             highestCardStrength = entry.getKey();
         }
         return highestCardStrength;
+    }
+
+    private Integer[] highCards(Map<Integer, Integer> rankMap) {
+        Integer[] hc = new Integer[7];
+        int i = 0;
+        for (Map.Entry<Integer, Integer> entry : rankMap.entrySet()) {
+            for (int j = 0; j < entry.getValue(); j++) {
+                hc[i] = entry.getKey();
+                i+=1;
+            }
+        }
+        i = 2;
+        Integer[] res = new Integer[5];
+        for (int j = 4; j >= 0; j--) {
+            res[j] = hc[i];
+            i+=1;
+        }
+        return res;
     }
 }

@@ -8,15 +8,14 @@ import java.util.*;
 
 public class Game {
 
-    private final Scanner scanner = new Scanner(System.in);
-    private final Random rnd = new Random();
-    private boolean isTextGame;
-
     protected Table table;
     private WinnerDeterminator wd;
-    private final DecisionMaker dm = new DecisionMaker();
 
-    public int bankrupts(Player[] players) {// Количество банкротов
+    public Game() {
+        table = new Table();
+    }
+
+    public int bankrupts(List<Player> players) {// Количество банкротов
         int counter = 0;
         for (Player player : players) {
             if (player.cash == 0) {
@@ -26,152 +25,192 @@ public class Game {
         return counter;
     }
 
-    public void displayText(String str, boolean isTextGame){
-        if (isTextGame) {
-            System.out.print(str);
+    public boolean everybodyChecks(List<Player> players) {
+        for (Player player : players) {
+            if (player.getState() == PlayerState.DEFAULT) {
+                return false;
+            }
         }
+        return true;
     }
 
-    public void oneRound(Player[] players, Deck deck, Table table, boolean isTextGame) {
+    public boolean endGameConditions(List<Player> players) { // Условия, при которых раунд не может продолжаться
+        Table table = players.get(0).getTable();
+        if ((table.amountOfFolds >= players.size() - 1)) {
+            if (table.amountOfFolds == players.size() - 1) {
+                for (Player player : players) {
+                    if (player.getState() != PlayerState.FOLD) {
+                        player.setCash(player.getCash() + table.getBank());
+                    }
+                }
+            }
+            if (table.amountOfFolds == players.size()) {
+                table.setBank(0);
+            }
+            System.out.println("Round is over");
+            System.out.println(players);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean everybodyAllIn(List<Player> players) {
+        for (Player player : players) {
+            if (player.getCash() != player.getBet()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean betIsTheSame(List<Player> players) { // Ставка у всех одинаковая
+        int lastNotFold = 0;
+        for (int i = 1; i < players.size(); i++) {
+            if (!players.get(i).getState().equals(PlayerState.FOLD)) {
+                if (players.get(i).getBet() != players.get(lastNotFold).getBet()) {
+                    return false;
+                }
+                lastNotFold = i;
+            }
+        }
+        return true;
+    }
+
+    public boolean bettingCircle(List<Player> players) { // Один ставочный круг
+        while (!betIsTheSame(players) || !everybodyChecks(players)) {
+            if (everybodyAllIn(players)) {
+                break;
+            }
+            for (Player player : players) {
+                if (player.getState().equals(PlayerState.FOLD)) {
+                    continue;
+                }
+                if (endGameConditions(players)) {
+                    return true;
+                }
+                player.makeMove();
+            }
+        }
+        for (Player player : players) {
+            if (player.getState().equals(PlayerState.CHECK)) {
+                player.setState(PlayerState.DEFAULT);
+            }
+        }
+        return false;
+    }
+
+    public void oneRound(List<Player> players, Table table) {
         for (Player player : players) {
             player.state = PlayerState.DEFAULT;
-            player.generateHand(deck);
-        }
-
-        displayText("New game!\n", isTextGame);
-
-        players[0].bet = 100;
-        table.setCurrentBet(100);
-
-        players[0].ui.showMessage("My cards " + Arrays.toString(players[0].getHand()));
-
-        if (dm.bettingCircle(players, GameStages.FIRST, table) == 1) {// Первое определение ставки, после чего достаются 3 карты
-            return;
+            player.generateHand(table.getDeck());
         }
 
         for (Player player : players) {
-            table.setBank(table.getBank() + player.bet);
-            player.cash -= player.bet;
-            player.bet = 0;
-        }
-        table.setCurrentBet(0);
-
-        boolean allIn = bankrupts(players) > 0;
-
-        System.arraycopy(table.generateCards(deck, GameStages.FIRST), 0, table.table, 0, 3);
-        displayText(Arrays.toString(table.table) + "\n", isTextGame);
-
-        if (!allIn) {
-            if (dm.bettingCircle(players, GameStages.SECOND, table) == 1) {// Второе определение ставки, после чего достется 4 карта
-                return;
+            if (player.ui != null) {
+                player.ui.showMessage("\nNew game!");
             }
+        }
 
+        players.get(0).bet = 100;
+        table.setCurrentBet(100);
+
+        for (Player player : players) {
+            if (player.ui != null) {
+                player.ui.showMessage("My cards: ");
+                player.ui.showCards(players.get(0).getHand());
+            }
+        }
+
+        boolean allIn;
+
+        for (GameStages gs : GameStages.values()) {
+            allIn = bankrupts(players) > 0;
+
+            if (!allIn) {
+                if (bettingCircle(players)) {
+                    return;
+                }
+                for (Player player : players) {
+                    table.setBank(table.getBank() + player.bet);
+                    player.cash -= player.bet;
+                    player.bet = 0;
+                }
+                table.setCurrentBet(0);
+            }
+            int destPos = gs.getNum() == 1 ? 0 : gs.getNum() == 2 ? 3 : gs.getNum() == 3 ? 4 : 5;
+            System.arraycopy(table.generateCards(gs), 0, table.table, destPos, gs.getCardAmount());
             for (Player player : players) {
-                table.setBank(table.getBank() + player.bet);
-                player.cash -= player.bet;
-                player.bet = 0;
+                if (player.ui != null) {
+                    player.ui.showCards(table.table);
+                }
             }
-            table.setCurrentBet(0);
         }
 
-        Card[] genCard1 = table.generateCards(deck, GameStages.SECOND);
-        System.arraycopy(genCard1, 0, table.table, 3, 1);
-        displayText(Arrays.toString(table.table) + "\n", isTextGame);
-
-        if (bankrupts(players) > 0) {
-            allIn = true;
-        }
-
-        if (!allIn) {
-            if (dm.bettingCircle(players, GameStages.THIRD, table) == 1) {// Третье определение ставки, после чего достется 5 карта
-                return;
+        for (Player player : players) {
+            if (player.ui != null) {
+                player.ui.showMessage("Opening up!");
             }
-            for (Player player : players) {
-                table.setBank(table.getBank() + player.bet);
-                player.cash -= player.bet;
-                player.bet = 0;
-            }
-            table.setCurrentBet(0);
         }
-
-        Card[] genCard2 = table.generateCards(deck, GameStages.THIRD);
-        System.arraycopy(genCard2, 0, table.table, 4, 1);
-        displayText(Arrays.toString(table.table) + "\n", isTextGame);
-
-        if (bankrupts(players) > 0) {
-            allIn = true;
-        }
-
-        if (!allIn) {
-            if (dm.bettingCircle(players, GameStages.FOURTH, table) == 1) {// Четвертое определение ставки, когда все карты открыты
-                return;
-            }
-            for (Player player : players) {
-                table.setBank(table.getBank() + player.bet);
-                player.cash -= player.bet;
-                player.bet = 0;
-            }
-            table.setCurrentBet(0);
-        }
-
-
-        displayText(Arrays.toString(table.table) + "\n", isTextGame);
-
-        displayText("Opening up!\n", isTextGame);
 
         wd = new WinnerDeterminator(players);
         Player[] winners = wd.determineTheWinner();
-        displayText("Winner: ", isTextGame);
         for (Player player : players) {
-            for (int i = 0; i < winners.length; i++) {
-                if (player.equals(winners[i])) {
-                    displayText(player.name, isTextGame);
-                    if (i != winners.length - 1) {
-                        displayText(", ", isTextGame);
+            if (player.ui != null) {
+                player.ui.showMessage("Winners: ");
+            }
+        }
+        for (Player player : players) {
+            for (Player winner : winners) {
+                if (player.equals(winner)) {
+                    if (player.ui != null) {
+                        player.ui.showMessage(player.name);
                     } else {
-                        displayText(" ", isTextGame);
+                        players.get(0).ui.showMessage(player.name);
                     }
                     player.cash += (table.getBank()) / winners.length;
                 }
             }
         }
 
-        displayText("with combination " + winners[0].combination.combination.toString() + "\n", isTextGame);
+        for (Player player : players) {
+            if (player.ui != null) {
+                player.ui.showMessage("with combination " + winners[0].combination.combination.toString());
+            }
+        }
 
-        displayText(Arrays.toString(players) + "\n", isTextGame);
+        for (Player player : players) {
+            if (player.ui != null) {
+                player.ui.showMessage(players.toString());
+            }
+        }
     }
 
-    public void start(String playerName, int cash, int amountOfBots, boolean isTextGame) {
-        Deck deck = new Deck();
-        Table table = new Table();
-        Player[] players = new Player[amountOfBots + 1];
-        players[0] = new Player(playerName, cash, table, new ConsoleGameUI(System.in, System.out));
-        for (int i = 1; i < players.length; i++) {
-            players[i] = new Bot("Bot" + i, cash, table);
+    public void start(List<Player> players) {
+        for (Player player : players) {
+            player.setTable(table);
         }
-        displayText("Enter play or stop: ", isTextGame);
-        String dec = "";
-        if (isTextGame) {
-            dec = scanner.next();
+        for (Player player : players) {
+            if (player.ui != null) {
+                player.ui.showMessage(players.toString());
+            }
         }
-        while (!dec.equals("stop")) {
-            if (dec.equals("play")) {
-                if (bankrupts(players) > 0) {
-                    displayText("Game is end! Somebody haven't got money \n" + Arrays.toString(players), isTextGame);
-                    return;
-                }
-                oneRound(players, deck, table, isTextGame);
-                table.setBank(0);
-                table.setCurrentBet(0);
-                table.table = new Card[5];
-                table.amountOfFolds = 0;
-                deck = new Deck();
+        while (true) {
+            if (bankrupts(players) > 0) {
                 for (Player player : players) {
-                    player.combination = null;
+                    if (player.ui != null) {
+                        player.ui.showMessage("Game is end! Somebody haven't got money");
+                        return;
+                    }
                 }
             }
-            displayText("Enter play or stop: ", isTextGame);
-            dec = scanner.next();
+            oneRound(players, table);
+            table.setBank(0);
+            table.setCurrentBet(0);
+            table.table = new Card[5];
+            table.amountOfFolds = 0;
+            for (Player player : players) {
+                player.combination = null;
+            }
         }
     }
 

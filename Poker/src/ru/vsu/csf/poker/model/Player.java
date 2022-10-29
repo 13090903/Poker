@@ -1,8 +1,8 @@
 package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.PlayerState;
-import ru.vsu.csf.poker.model.interfaces.GameUI;
-import ru.vsu.csf.poker.model.interfaces.PlayerActions;
+import ru.vsu.csf.poker.interfaces.GameUI;
+import ru.vsu.csf.poker.interfaces.PlayerActions;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -69,7 +69,7 @@ public class Player implements PlayerActions, Comparable<Player> {
         state = PlayerState.CHECK;
     }
 
-    public void move() {
+    public void makeMove() {
         ui.showGameState(bet, table.getCurrentBet(), table.getBank());
         Move move = ui.prompt("Your turn: ");
         while (move == null) {
@@ -156,12 +156,12 @@ public class Player implements PlayerActions, Comparable<Player> {
         return bet;
     }
 
-    public void setBet(int bet) {
-        this.bet = bet;
-    }
-
     public Table getTable() {
         return table;
+    }
+
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     @Override

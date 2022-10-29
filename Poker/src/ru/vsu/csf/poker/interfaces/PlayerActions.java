@@ -1,4 +1,4 @@
-package ru.vsu.csf.poker.model.interfaces;
+package ru.vsu.csf.poker.interfaces;
 
 public interface PlayerActions {
     void call();

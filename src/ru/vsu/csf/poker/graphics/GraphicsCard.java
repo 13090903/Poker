@@ -13,7 +13,7 @@ public class GraphicsCard extends JComponent {
     private final Image img;
 
     public GraphicsCard(Card card, GraphicsCardType type) {
-        String s = "Poker/src/img/" + card.getRank().toString() + card.getSuitName() + ".png";
+        String s = "src/img/" + card.getRank().toString() + card.getSuitName() + ".png";
         this.img = new ImageIcon(s).getImage();
         setPreferredSize(new Dimension(100, 145));
         this.type = type;

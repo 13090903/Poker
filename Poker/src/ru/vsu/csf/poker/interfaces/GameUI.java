@@ -1,7 +1,10 @@
 package ru.vsu.csf.poker.interfaces;
 
+import ru.vsu.csf.poker.graphics.DrawPanel;
 import ru.vsu.csf.poker.model.Card;
 import ru.vsu.csf.poker.model.Move;
+import ru.vsu.csf.poker.model.Player;
+import ru.vsu.csf.poker.model.Table;
 
 public interface GameUI {
     default Move prompt(String message) {
@@ -15,5 +18,7 @@ public interface GameUI {
 
     void showMessage(String message);
 
-    void showCards(Card[] cards);
+    void showTable(Table table);
+
+    void showHand(Card[] cards);
 }

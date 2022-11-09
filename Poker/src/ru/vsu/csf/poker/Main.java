@@ -1,9 +1,10 @@
 package ru.vsu.csf.poker;
 
-import ru.vsu.csf.poker.model.Bot;
-import ru.vsu.csf.poker.model.ConsoleGameUI;
-import ru.vsu.csf.poker.model.Game;
-import ru.vsu.csf.poker.model.Player;
+import ru.vsu.csf.poker.enums.Rank;
+import ru.vsu.csf.poker.enums.Suit;
+import ru.vsu.csf.poker.graphics.GraphicsGameUI;
+import ru.vsu.csf.poker.graphics.MainWindow;
+import ru.vsu.csf.poker.model.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +30,8 @@ public class Main {
                 players.add(new Bot("Bot" + i, Integer.parseInt(s[1]), null));
             }
             game.start(players);
+        } else if (type.equals("2")){
+            MainWindow w = new MainWindow();
         }
     }
 }

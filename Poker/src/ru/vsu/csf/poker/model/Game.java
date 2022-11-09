@@ -117,7 +117,7 @@ public class Game {
         for (Player player : players) {
             if (player.ui != null) {
                 player.ui.showMessage("My cards: ");
-                player.ui.showCards(players.get(0).getHand());
+                player.ui.showHand(players.get(0).getHand());
             }
         }
 
@@ -141,7 +141,7 @@ public class Game {
             System.arraycopy(table.generateCards(gs), 0, table.table, destPos, gs.getCardAmount());
             for (Player player : players) {
                 if (player.ui != null) {
-                    player.ui.showCards(table.table);
+                    player.ui.showTable(table);
                 }
             }
         }

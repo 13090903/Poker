@@ -20,6 +20,10 @@ public class Card {
         return suit;
     }
 
+    public String getSuitName() {
+        return suit.name();
+    }
+
     @Override
     public String toString() {
         return rank + "" + suit;

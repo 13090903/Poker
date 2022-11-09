@@ -1,6 +1,7 @@
 package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.MoveType;
+import ru.vsu.csf.poker.graphics.DrawPanel;
 import ru.vsu.csf.poker.interfaces.GameUI;
 
 import java.io.InputStream;
@@ -50,8 +51,13 @@ public class ConsoleGameUI implements GameUI {
     }
 
     @Override
-    public void showCards(Card[] cards) {
+    public void showHand(Card[] cards) {
         out.println(Arrays.toString(cards));
+    }
+
+    @Override
+    public void showTable(Table table) {
+        out.println(Arrays.toString(table.table));
     }
 
     @Override

@@ -2,6 +2,7 @@ package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.GameStages;
 import ru.vsu.csf.poker.interfaces.CardGeneration;
+import ru.vsu.csf.poker.utils.Coord;
 
 import java.util.Random;
 

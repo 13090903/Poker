@@ -3,6 +3,7 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.PlayerState;
 import ru.vsu.csf.poker.interfaces.GameUI;
 import ru.vsu.csf.poker.interfaces.PlayerActions;
+import ru.vsu.csf.poker.utils.Coord;
 
 import java.util.Arrays;
 import java.util.Random;

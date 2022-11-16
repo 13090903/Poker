@@ -3,20 +3,29 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.PlayerState;
 import ru.vsu.csf.poker.interfaces.GameUI;
 import ru.vsu.csf.poker.interfaces.PlayerActions;
-import ru.vsu.csf.poker.utils.Coord;
 
-import java.util.Arrays;
-import java.util.Random;
+import java.util.*;
+
+import static ru.vsu.csf.poker.Main.rb;
 
 public class Player implements PlayerActions, Comparable<Player> {
-    private final Random rnd = new Random();
+
+    private String yourTurn = rb.getString("yourTurn");
+    private String invalidInput = rb.getString("invalidInput");
+    private String dontCall = rb.getString("dontCall");
+    private String dontCheck = rb.getString("dontCheck");
+    private String notEnoughCash = rb.getString("notEnoughCash");
+    private String betLessThanLast = rb.getString("betLessThanLast");
+
     protected String name;
     protected int cash;
     protected int bet;
 
+    private final UUID id = UUID.randomUUID();
+
     protected PlayerState state;
     protected CombinationPlusHighCard combination;
-    protected Card[] hand;
+    protected Card[] hand = new Card[2];
     private Table table;
     private final CombinationDeterminator cd = new CombinationDeterminator(this, this.table);
     protected GameUI ui;
@@ -37,7 +46,6 @@ public class Player implements PlayerActions, Comparable<Player> {
         state = PlayerState.FOLD;
         table.setBank(table.getBank() + bet);
         cash -= bet;
-        bet = 0;
     }
 
     @Override
@@ -72,17 +80,20 @@ public class Player implements PlayerActions, Comparable<Player> {
 
     public void makeMove() {
         ui.showGameState(bet, table.getCurrentBet(), table.getBank());
-        Move move = ui.prompt("Your turn: ");
+        Move move = ui.prompt(yourTurn + ": ");
         while (move == null) {
-            move = ui.prompt("Invalid input, try again");
+            move = ui.prompt(invalidInput);
         }
 
         switch (move.getMoveType()) {
             case CALL -> {
+                if (cash < table.getCurrentBet()) {
+                    fold();
+                }
                 if (bet < table.getCurrentBet() || bet > table.getCurrentBet()) {
                     call();
                 } else {
-                    ui.showMessage("You don't need to call, your bet is current bet in game, so check");
+                    ui.showMessage(dontCall);
                     check();
                 }
             }
@@ -90,7 +101,7 @@ public class Player implements PlayerActions, Comparable<Player> {
                 if (bet == table.getCurrentBet()) {
                     check();
                 } else {
-                    ui.showMessage("You can't check, your bet isn't current bet in game, so call");
+                    ui.showMessage(dontCheck);
                     call();
                 }
             }
@@ -101,10 +112,10 @@ public class Player implements PlayerActions, Comparable<Player> {
             case RAISE -> {
                 int newBet = move.getRaiseValue();
                 if (cash < newBet) {
-                    ui.showMessage("You haven't got enough cash, so you bet all");
+                    ui.showMessage(notEnoughCash);
                     raise(cash);
                 } else if (newBet <= table.getCurrentBet()) {
-                    ui.showMessage("Bet is less than last, so raise for 100");
+                    ui.showMessage(betLessThanLast);
                     raise(table.getCurrentBet() + 100);
                 }
                 raise(newBet);
@@ -118,15 +129,9 @@ public class Player implements PlayerActions, Comparable<Player> {
     }
 
     public void generateHand(Deck deck) { // Сгенерировать 2 карты игрока
-        Card[] hand = new Card[2];
-        int cardsCounter = deck.deck.size();
-        int num = rnd.nextInt(cardsCounter);
-        hand[0] = deck.deck.get(num);
-        deck.deck.remove(num);
-        num = rnd.nextInt(cardsCounter - 1);
-        hand[1] = deck.deck.get(num);
-        deck.deck.remove(num);
-        this.setHand(hand);
+        for (int i = 0; i < 2; i++) {
+            hand[i] = deck.pop();
+        }
     }
 
     public int getCash() {
@@ -165,12 +170,24 @@ public class Player implements PlayerActions, Comparable<Player> {
         this.table = table;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     @Override
     public String toString() {
         return name + "{" +
                 "cash=" + cash +
                 ", hand=" + Arrays.toString(hand) +
                 '}';
+    }
+
+    public CombinationPlusHighCard getCombination() {
+        return combination;
     }
 
     public int compareTo(Player p) {

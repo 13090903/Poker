@@ -2,9 +2,7 @@ package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.PlayerState;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class WinnerDeterminator {
     private final Player[] players;
@@ -14,23 +12,28 @@ public class WinnerDeterminator {
     }
 
     public Player[] determineTheWinner() {
+        List<Player> playersToCompare = new ArrayList<>();
         for (Player player : players) {
             if (!player.state.equals(PlayerState.FOLD)) {
                 player.checkCombination();
+                playersToCompare.add(player);
             }
         }
-        Player[] newPlayers = Arrays.copyOf(players, players.length);
-        Arrays.sort(newPlayers);
+        Collections.sort(playersToCompare);
 
         int winCounter = 1;
-        for (int i = 1; i < players.length; i++) {
-            if (newPlayers[i].combination.combination.getStrength() == newPlayers[i - 1].combination.combination.getStrength()) {
-                if (Objects.equals(newPlayers[i].combination.highCard, newPlayers[i - 1].combination.highCard)) {
+        for (int i = 1; i < playersToCompare.size(); i++) {
+            if (playersToCompare.get(i).combination.combination.getStrength() == playersToCompare.get(0).combination.combination.getStrength()) {
+                if (Objects.equals(playersToCompare.get(i).combination.highCard, playersToCompare.get(0).combination.highCard)) {
                     winCounter += 1;
                 }
             }
         }
 
-        return Arrays.copyOfRange(newPlayers, 0, winCounter);
+        Player[] winners = new Player[winCounter];
+        for (int i = 0; i < winCounter; i++) {
+            winners[i] = playersToCompare.get(i);
+        }
+        return winners;
     }
 }

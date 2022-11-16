@@ -6,13 +6,13 @@ import ru.vsu.csf.poker.graphics.GraphicsGameUI;
 import ru.vsu.csf.poker.graphics.MainWindow;
 import ru.vsu.csf.poker.model.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
 
     public static Scanner scanner = new Scanner(System.in);
+    public static Locale locale = new Locale("ru", "RU");
+    public static ResourceBundle rb = ResourceBundle.getBundle("text", locale);
 
     public static void main(String[] args) {
         System.out.println("Чтобы запустить конслольное приложение введите - 1, графическое - 2");
@@ -24,12 +24,11 @@ public class Main {
             for (int i = 0; i < 3; i++) {
                 s[i] = scanner.next();
             }
-            List<Player> players = new ArrayList<>();
-            players.add(new Player(s[0], Integer.parseInt(s[1]), null, new ConsoleGameUI(System.in, System.out)));
+            game.addPlayer(new Player(s[0], Integer.parseInt(s[1]), null, new ConsoleGameUI(System.in, System.out)));
             for (int i = 0; i < Integer.parseInt(s[2]); i++) {
-                players.add(new Bot("Bot" + i, Integer.parseInt(s[1]), null));
+                game.addPlayer(new Bot("Bot" + i, Integer.parseInt(s[1]), null));
             }
-            game.start(players);
+            game.start();
         } else if (type.equals("2")){
             MainWindow w = new MainWindow();
         }

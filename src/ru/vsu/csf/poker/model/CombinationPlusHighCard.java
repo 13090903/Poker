@@ -20,4 +20,8 @@ public class CombinationPlusHighCard{
         this.highCard = highCard;
         this.hcNotInComb = hcNotInComb;
     }
+
+    public Combinations getCombination() {
+        return combination;
+    }
 }

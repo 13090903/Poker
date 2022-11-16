@@ -3,7 +3,6 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.Combinations;
 import ru.vsu.csf.poker.enums.Suit;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -27,7 +26,7 @@ public class CombinationDeterminator {
         for (Card card : player.getHand()) {
             FillMaps(rankMap, suitMap, rankSuitMap, card);
         }
-        for (Card card : table.table) {
+        for (Card card : table.cards) {
             FillMaps(rankMap, suitMap, rankSuitMap, card);
         }// Заполнили словари
 

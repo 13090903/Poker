@@ -1,7 +1,6 @@
 package ru.vsu.csf.poker.enums;
 
 public enum GameStages {
-    // todo количество карт, которые можно выкладывать на стол, стол принимает номер хода
     FIRST(1, 3),
     SECOND(2, 1),
     THIRD(3, 1),

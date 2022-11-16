@@ -6,34 +6,80 @@ import ru.vsu.csf.poker.model.Player;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static ru.vsu.csf.poker.Main.rb;
 
 public class GraphicsPlayer extends JComponent {
 
+    private String cashText = rb.getString("cash");
+
+    private static Color DEFAULT_BORDER_COLOR;
+    private static final Font DEFAULT_FONT = new Font("Times", Font.BOLD, 20);
+
+    private Color borderColor;
+    private Player player;
+    private JLabel cashLabel = new JLabel();
+
     private DrawPanel.Slot slot;
-    private final int width = 220, height = 160;
+    private final int width = 220, height = 160 + 25;
 
     private final GraphicsCard[] hand = new GraphicsCard[2];
     private final boolean self;
 
     public GraphicsPlayer(Player player, boolean self) {
+        this.player = player;
         this.self = self;
         setPreferredSize(new Dimension(width, height));
 
         if (self) {
-            setBorder(BorderFactory.createLineBorder(Color.GREEN, 2));
+           DEFAULT_BORDER_COLOR = Color.GREEN;
         } else {
-            setBorder(BorderFactory.createLineBorder(Color.RED, 1));
+            DEFAULT_BORDER_COLOR = Color.RED;
         }
+        borderColor = DEFAULT_BORDER_COLOR;
+
         setLayout(new FlowLayout(FlowLayout.CENTER));
 
+        repaint();
+    }
+
+    public void render() {
+        reset();
+        renderCards();
+        cashLabel.setText( player.getName() + " " + cashText + ": " + player.getCash());
+        cashLabel.setFont(DEFAULT_FONT);
+        add(cashLabel);
+
+        repaint();
+    }
+
+    public void highlight() {
+        borderColor = Color.YELLOW;
+    }
+
+    public void reset() {
+        removeAll();
+        if (self) {
+            DEFAULT_BORDER_COLOR = Color.GREEN;
+        } else {
+            DEFAULT_BORDER_COLOR = Color.RED;
+        }
+        borderColor = DEFAULT_BORDER_COLOR;
+    }
+
+    public void renderCards() {
         int i = 0;
         for (Card card : player.getHand()) {
             GraphicsCard graphicsCard = new GraphicsCard(card, self ? GraphicsCardType.SHOWN : GraphicsCardType.HIDDEN);
             add(graphicsCard);
             hand[i++] = graphicsCard;
         }
+    }
 
-        repaint();
+    public Player getPlayer() {
+        return player;
     }
 
     public void setSlot(DrawPanel.Slot slot) {
@@ -42,6 +88,10 @@ public class GraphicsPlayer extends JComponent {
 
     public DrawPanel.Slot getSlot() {
         return slot;
+    }
+
+    public GraphicsCard[] getHand() {
+        return hand;
     }
 
     @Override
@@ -55,7 +105,8 @@ public class GraphicsPlayer extends JComponent {
     }
 
     @Override
-    public void paintComponent(Graphics graphics) {
-        Graphics2D g = (Graphics2D) graphics;
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        setBorder(BorderFactory.createLineBorder(borderColor, 2));
     }
 }

@@ -8,13 +8,22 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.Scanner;
+
+import static ru.vsu.csf.poker.Main.rb;
 
 
 public class ConsoleGameUI implements GameUI {
 
     private Scanner in;
     private PrintWriter out;
+
+
+    private String myBetText = rb.getString("myBet");
+    private String currBetText = rb.getString("currBet");
+    private String bankText = rb.getString("bank");
 
     public ConsoleGameUI(InputStream in, OutputStream out) {
         this.in = new Scanner(in);
@@ -23,7 +32,6 @@ public class ConsoleGameUI implements GameUI {
 
     @Override
     public Move prompt() {
-//        showMessage("Your Turn: ");
         String[] input = in.nextLine().split(" ");
         String typeStr = input[0];
         switch (typeStr) {
@@ -57,13 +65,13 @@ public class ConsoleGameUI implements GameUI {
 
     @Override
     public void showTable(Table table) {
-        out.println(Arrays.toString(table.table));
+        out.println(table.cards);
     }
 
     @Override
     public void showGameState(int playerBet, int currBet, int bank) {
-        out.println("My bet: " + playerBet);
-        out.println("Current bet: " + currBet);
-        out.println("Bank: " + bank);
+        out.println(myBetText + ": " + playerBet);
+        out.println(currBetText + ": " + currBet);
+        out.println(bankText + ": " + bank);
     }
 }

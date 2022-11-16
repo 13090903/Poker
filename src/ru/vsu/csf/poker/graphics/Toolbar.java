@@ -1,16 +1,17 @@
 package ru.vsu.csf.poker.graphics;
 
-import ru.vsu.csf.poker.graphics.components.Button;
+import ru.vsu.csf.poker.graphics.components.MyButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Toolbar extends JComponent {
 
     private final int width, height;
-    private final Button fold, call, check, raise;
-    private List<Button> buttons;
+    private final MyButton fold, call, check, raise;
+    private List<MyButton> myButtons = new ArrayList<>();
 
     public Toolbar() {
         width = 550;
@@ -20,10 +21,14 @@ public class Toolbar extends JComponent {
         int bWidth = 130;
         int bHeight = 50;
 
-        fold = new Button("Fold");
-        call = new Button("Call");
-        check = new Button("Check");
-        raise = new Button("Raise");
+        fold = new MyButton("Fold");
+        call = new MyButton("Call");
+        check = new MyButton("Check");
+        raise = new MyButton("Raise");
+        myButtons.add(fold);
+        myButtons.add(call);
+        myButtons.add(check);
+        myButtons.add(raise);
         fold.setPreferredSize(new Dimension(bWidth, bHeight));
         call.setPreferredSize(new Dimension(bWidth, bHeight));
         check.setPreferredSize(new Dimension(bWidth, bHeight));
@@ -40,6 +45,7 @@ public class Toolbar extends JComponent {
         add(raise);
 
         repaint();
+
     }
 
     @Override
@@ -50,5 +56,9 @@ public class Toolbar extends JComponent {
     @Override
     public int getHeight() {
         return height;
+    }
+
+    public List<MyButton> getButtons() {
+        return myButtons;
     }
 }

@@ -29,4 +29,8 @@ public class GraphicsCard extends JComponent {
             g.drawImage(img, 0, 0, null);
         }
     }
+
+    public void setType(GraphicsCardType type) {
+        this.type = type;
+    }
 }

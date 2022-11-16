@@ -14,6 +14,11 @@ public class Bot extends Player {
 
     @Override
     public void makeMove() {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         int randomInt = rnd.nextInt(50);
         Move move = null;
         switch (randomInt) {
@@ -25,6 +30,9 @@ public class Bot extends Player {
                 }
                 if (bet == getTable().getCurrentBet()) {
                     move = new Move(MoveType.CHECK);
+                }
+                if (cash < getTable().getCurrentBet()) {
+                    move = new Move(MoveType.FOLD);
                 }
             }
         }

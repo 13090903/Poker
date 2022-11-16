@@ -14,7 +14,7 @@ public class CardsContainer extends JComponent {
         this.width = width;
         this.height = height;
         setPreferredSize(new Dimension(width, height));
-        setLayout(new FlowLayout(FlowLayout.CENTER));
+        setLayout(new FlowLayout(FlowLayout.LEFT));
         setBorder(BorderFactory.createLineBorder(Color.black, 2));
     }
 

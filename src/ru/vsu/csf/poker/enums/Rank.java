@@ -1,5 +1,9 @@
 package ru.vsu.csf.poker.enums;
 
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Optional;
+
 public enum Rank {
     TWO(2, "2"),
     THREE(3, "3"),
@@ -30,5 +34,18 @@ public enum Rank {
     @Override
     public String toString() {
         return name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public static Rank valueOf(String s, int dummy) {
+        for (Rank r : values()) {
+            if (Objects.equals(r.name, s)) {
+                return r;
+            }
+        }
+        return null;
     }
 }

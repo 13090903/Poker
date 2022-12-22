@@ -1,40 +1,40 @@
 package ru.vsu.csf.poker.graphics;
 
 import ru.vsu.csf.poker.enums.GraphicsCardType;
+import ru.vsu.csf.poker.event.PlayerEvent;
 import ru.vsu.csf.poker.model.Card;
 import ru.vsu.csf.poker.model.Player;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 import static ru.vsu.csf.poker.Main.rb;
 
 public class GraphicsPlayer extends JComponent {
 
     private String cashText = rb.getString("cash");
+    private String myBetText = rb.getString("bet");
 
     private static Color DEFAULT_BORDER_COLOR;
     private static final Font DEFAULT_FONT = new Font("Times", Font.BOLD, 20);
 
     private Color borderColor;
-    private Player player;
+    private PlayerEvent playerEvent;
     private JLabel cashLabel = new JLabel();
+    private JLabel myBetLabel = new JLabel();
 
     private DrawPanel.Slot slot;
-    private final int width = 220, height = 160 + 25;
+    private final int width = 220, height = 160 + 25 + 35;
 
     private final GraphicsCard[] hand = new GraphicsCard[2];
     private final boolean self;
 
-    public GraphicsPlayer(Player player, boolean self) {
-        this.player = player;
+    public GraphicsPlayer(boolean self) {
         this.self = self;
         setPreferredSize(new Dimension(width, height));
 
         if (self) {
-           DEFAULT_BORDER_COLOR = Color.GREEN;
+            DEFAULT_BORDER_COLOR = Color.GREEN;
         } else {
             DEFAULT_BORDER_COLOR = Color.RED;
         }
@@ -45,12 +45,15 @@ public class GraphicsPlayer extends JComponent {
         repaint();
     }
 
-    public void render() {
+    public void render(PlayerEvent playerEvent) {
         reset();
-        renderCards();
-        cashLabel.setText( player.getName() + " " + cashText + ": " + player.getCash());
+        renderCards(playerEvent.getHand());
+        cashLabel.setText(playerEvent.getName() + " " + cashText + ": " + playerEvent.getCash());
+        myBetLabel.setText(myBetText + ": " + playerEvent.getBet());
         cashLabel.setFont(DEFAULT_FONT);
+        myBetLabel.setFont(DEFAULT_FONT);
         add(cashLabel);
+        add(myBetLabel);
 
         repaint();
     }
@@ -69,18 +72,15 @@ public class GraphicsPlayer extends JComponent {
         borderColor = DEFAULT_BORDER_COLOR;
     }
 
-    public void renderCards() {
+    public void renderCards(Card[] playerHand) {
         int i = 0;
-        for (Card card : player.getHand()) {
+        for (Card card : playerHand) {
             GraphicsCard graphicsCard = new GraphicsCard(card, self ? GraphicsCardType.SHOWN : GraphicsCardType.HIDDEN);
             add(graphicsCard);
             hand[i++] = graphicsCard;
         }
     }
 
-    public Player getPlayer() {
-        return player;
-    }
 
     public void setSlot(DrawPanel.Slot slot) {
         this.slot = slot;
@@ -108,5 +108,9 @@ public class GraphicsPlayer extends JComponent {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         setBorder(BorderFactory.createLineBorder(borderColor, 2));
+    }
+
+    public PlayerEvent getPlayerEvent() {
+        return playerEvent;
     }
 }

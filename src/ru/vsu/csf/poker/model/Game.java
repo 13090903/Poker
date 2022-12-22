@@ -16,15 +16,17 @@ public class Game {
     private String end = rb.getString("end");
     private String roundOver = rb.getString("roundOver");
 
-    private Consumer<UUID> callback;
+    private Consumer<GameCallBackObj> callback;
 
     private List<Player> players = new ArrayList<>();
+    private List<Player> waitingPlayers = new ArrayList<>();
     private List<Player> roundWinners = new ArrayList<>();
+    private boolean isRoundGoing;
 
     protected Table table = new Table();;
     private WinnerDeterminator wd;
 
-    public void setCallback(Consumer<UUID> callback) {
+    public void setCallback(Consumer<GameCallBackObj> callback) {
         this.callback = callback;
     }
 
@@ -99,6 +101,7 @@ public class Game {
                 break;
             }
             for (int i = 0; i < players.size(); i++) {
+                System.out.println(players.size());
                 if (players.get(i).getState().equals(PlayerState.FOLD) || players.get(i).cash <= 0) {
                     continue;
                 }
@@ -106,12 +109,12 @@ public class Game {
                     return true;
                 }
                 if (callback != null) {
-                    callback.accept(players.get(i).getId());
+                    callback.accept(new GameCallBackObj(players.get(i).getId(), false));
                 }
                 players.get(i).makeMove();
 
                 if (callback != null) {
-                    callback.accept(null);
+                    callback.accept(new GameCallBackObj(players.get(i).getId(), true));
                 }
 
             }
@@ -124,11 +127,26 @@ public class Game {
         return false;
     }
 
+    public Player getPlayerByID(UUID id) {
+        for (Player player : players) {
+            if (player.getId().equals(id)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
     public void oneRound(List<Player> players, Table table) {
+        isRoundGoing = true;
+        if (waitingPlayers.size() != 0) {
+            players.addAll(waitingPlayers);
+            waitingPlayers.clear();
+        }
 
         for (Player player : players) {
             player.state = PlayerState.DEFAULT;
             player.generateHand(table.getDeck());
+            player.setTable(table);
         }
 
         for (Player player : players) {
@@ -186,14 +204,14 @@ public class Game {
         roundWinners = new ArrayList<>(Arrays.asList(winners));
         for (Player player : players) {
             if (player.ui != null) {
-                player.ui.showMessage(rb.getString("winners") + ": ");
+//                player.ui.showMessage(rb.getString("winners") + ": ");
             }
         }
         for (Player player : players) {
             for (Player winner : winners) {
                 if (player.equals(winner)) {
                     if (player.ui != null) {
-                        player.ui.showMessage(player.name);
+//                        player.ui.showMessage(player.name);
                     } else {
 //                        players.get(0).ui.showMessage(player.name);
                     }
@@ -203,24 +221,31 @@ public class Game {
         }
 
         if (callback != null) {
-            callback.accept(null);
+            callback.accept(new GameCallBackObj(roundWinners));
         }
 
         for (Player player : players) {
             if (player.ui != null) {
-                player.ui.showMessage(rb.getString("withComb") + " " + winners[0].combination.combination.toString());
+//                player.ui.showMessage(rb.getString("withComb") + " " + winners[0].combination.combination.toString());
             }
         }
 
         for (Player player : players) {
             if (player.ui != null) {
-                player.ui.showMessage(players.toString());
+//                player.ui.showMessage(players.toString());
             }
         }
+
+        isRoundGoing = false;
     }
 
-    public void addPlayer(Player player) {
-        players.add(player);
+    public UUID addPlayer(Player player) {
+        if (!isRoundGoing) {
+            players.add(player);
+        } else {
+            waitingPlayers.add(player);
+        }
+        return player.getId();
     }
 
     public void start() {
@@ -257,5 +282,13 @@ public class Game {
 
     public List<Player> getRoundWinners() {
         return roundWinners;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public List<Player> getWaitingPlayers() {
+        return waitingPlayers;
     }
 }

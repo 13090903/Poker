@@ -1,8 +1,9 @@
 package ru.vsu.csf.poker.graphics;
 
 import ru.vsu.csf.poker.enums.GraphicsCardType;
-import ru.vsu.csf.poker.enums.Rank;
-import ru.vsu.csf.poker.enums.Suit;
+import ru.vsu.csf.poker.event.PlayerEvent;
+import ru.vsu.csf.poker.event.TableEvent;
+import ru.vsu.csf.poker.graphics.components.ToolbarButton;
 import ru.vsu.csf.poker.model.*;
 
 import javax.swing.*;
@@ -11,21 +12,24 @@ import java.util.*;
 import java.util.List;
 
 import static ru.vsu.csf.poker.Main.rb;
+import static ru.vsu.csf.poker.graphics.components.ToolbarButton.DEFAULT_COLOR;
 
 
 public class DrawPanel extends JPanel {
+    Map<UUID, GraphicsPlayer> graphicsPlayerMap = new HashMap<>();
+    private final ServerConnection serverConnection;
 
-    private String bankText = rb.getString("bank");
-    private String currBetText = rb.getString("currBet");
-    private String winnersText = rb.getString("winners");
-    private String withCombText = rb.getString("withComb");
+    private final String bankText = rb.getString("bank");
+    private final String currBetText = rb.getString("currBet");
+    private final String winnersText = rb.getString("winners");
+    private final String withCombText = rb.getString("withComb");
 
     private final Font DEFAULT_FONT = new Font("Times", Font.BOLD, 20);
 
-    private JLabel bankLabel = new JLabel();
-    private JLabel currentBetLabel = new JLabel();
-    private JLabel winnersLabel = new JLabel();
-    private JTextArea raiseBet = new JTextArea();
+    private final JLabel bankLabel = new JLabel();
+    private final JLabel currentBetLabel = new JLabel();
+    private final JLabel winnersLabel = new JLabel();
+    private final JTextArea raiseBet = new JTextArea();
 
     public static class Slot {
         private final int x, y;
@@ -38,15 +42,15 @@ public class DrawPanel extends JPanel {
         }
     }
 
-    private Game game;
-
     private final List<Slot> playerSlots = new ArrayList<>();
-    private final List<GraphicsPlayer> players = new ArrayList<>();
 
     private final CardsContainer cardsContainer = new CardsContainer(550, 160);
-    private Toolbar toolbar;
+    private final Toolbar toolbar = new Toolbar(this);
 
     public DrawPanel() {
+        serverConnection = new ServerConnection("localhost", 9999, this);
+        new Thread(serverConnection).start();
+
         setBackground(Color.LIGHT_GRAY);
         setLayout(null);
         initPlayerSlots();
@@ -55,15 +59,14 @@ public class DrawPanel extends JPanel {
         initCardsContainer();
         initLabels();
 
-        initBotGame(3);
 
         repaint();
     }
 
     private void initLabels() {
-        bankLabel.setBounds(1000, 350, 300, 50);
-        currentBetLabel.setBounds(1000, 400, 300, 50);
-        winnersLabel.setBounds(25, 325, 350, 150);
+        bankLabel.setBounds(1000, 300, 300, 50);
+        currentBetLabel.setBounds(1000, 350, 300, 50);
+        winnersLabel.setBounds(25, 275, 350, 150);
         raiseBet.setBounds(1000, 720, 100, 30);
         winnersLabel.setFont(new Font("Times", Font.BOLD, 30));
         raiseBet.setFont(DEFAULT_FONT);
@@ -76,82 +79,89 @@ public class DrawPanel extends JPanel {
         add(raiseBet);
     }
 
-    private void initBotGame(int n) {
-        game = new Game();
-        game.setCallback(id -> {
-            if (id != null) {
-                for (GraphicsPlayer graphicsPlayer : players) {
-                    if (graphicsPlayer.getPlayer().getId().equals(id)) {
-                        graphicsPlayer.highlight();
-                    }
-                }
-                return;
-            }
-
-            update();
-        });
-        Player player = new Player("Player", 4000, null, new GraphicsGameUI(this));
-        game.addPlayer(player);
-        addPlayer(player, true);
-        for (int i = 0; i < n; i++) {
-            Bot bot = new Bot("Bot" + i, 4000, null);
-            game.addPlayer(bot);
-            addPlayer(bot, false);
-        }
-        game.start();
-    }
+//    private void initBotGame(int n) {
+//        game = new Game();
+//        game.setCallback(id -> {
+//            if (id != null) {
+//                for (GraphicsPlayer graphicsPlayer : players) {
+//                    if (graphicsPlayer.getPlayerEvent().getId().equals(id)) {
+//                        graphicsPlayer.highlight();
+//                    }
+//                }
+//                return;
+//            }
+//            update();
+//        });
+//        Player player = new Player("Player", 4000, null, new GraphicsGameUI(this));
+//        game.addPlayer(player);
+//        addPlayer(true);
+//        for (int i = 0; i < n; i++) {
+//            Bot bot = new Bot("Bot" + i, 4000, null);
+//            game.addPlayer(bot);
+//            addPlayer(false);
+//        }
+//        game.start();
+//    }
 
     private void initPlayerSlots() {
-        playerSlots.add(new Slot(100, 80));
-        playerSlots.add(new Slot(590, 80));
-        playerSlots.add(new Slot(1080, 80));
-        playerSlots.add(new Slot(100, 520));
-        playerSlots.add(new Slot(590, 520));
-        playerSlots.add(new Slot(1080, 520));
+        playerSlots.add(new Slot(100, 30));
+        playerSlots.add(new Slot(590, 30));
+        playerSlots.add(new Slot(1080, 30));
+        playerSlots.add(new Slot(100, 470));
+        playerSlots.add(new Slot(590, 470));
+        playerSlots.add(new Slot(1080, 470));
     }
 
-    private void update() {
-        for (GraphicsPlayer player : players) {
-            player.render();
-        }
-        cardsContainer.clear();
-        winnersLabel.setText("");
-        for (Card card : game.getTable().getCards()) {
-            cardsContainer.addCard(new GraphicsCard(card, GraphicsCardType.SHOWN));
-        }
-
-
-        bankLabel.setText(bankText + ": " + game.getTable().getBank());
-        currentBetLabel.setText(currBetText + ": " + game.getTable().getCurrentBet());
-
-        if (game.getRoundWinners().size() != 0) {
-            StringBuilder s = new StringBuilder(winnersText + ": ");
-            StringBuilder s1 = new StringBuilder(withCombText + ": ");
-            for (Player player : game.getRoundWinners()) {
-                s.append(player.getName()).append(" ");
-            }
-            s1.append(game.getRoundWinners().get(0).getCombination().getCombination());
-            winnersLabel.setText("<html>" + s + "<br>" + s1 + "</html>");
-            for (GraphicsPlayer player : players) {
-                player.getHand()[0].setType(GraphicsCardType.SHOWN);
-                player.getHand()[1].setType(GraphicsCardType.SHOWN);
-            }
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
+    public void updatePlayer(PlayerEvent e) {
+        graphicsPlayerMap.get(e.getId()).render(e);
 
         revalidate();
-
         repaint();
     }
 
-    private void addPlayer(Player player, boolean self) {
-        GraphicsPlayer newPlayer = new GraphicsPlayer(player, self);
-        players.add(newPlayer);
+    public void updateTable(TableEvent e) {
+        bankLabel.setText(bankText + ": " + e.getBank());
+        currentBetLabel.setText(currBetText + ": " + e.getCurrentBet());
+
+        cardsContainer.clear();
+        for (Card card : e.getTableCards()) {
+            cardsContainer.addCard(new GraphicsCard(card, GraphicsCardType.SHOWN));
+        }
+
+        revalidate();
+        repaint();
+    }
+
+//    private void update() {
+//
+//        if (game.getRoundWinners().size() != 0) {
+//            StringBuilder s = new StringBuilder(winnersText + ": ");
+//            StringBuilder s1 = new StringBuilder(withCombText + ": ");
+//            for (Player player : game.getRoundWinners()) {
+//                s.append(player.getName()).append(" ");
+//            }
+//            s1.append(game.getRoundWinners().get(0).getCombination().getCombination());
+//            winnersLabel.setText("<html>" + s + "<br>" + s1 + "</html>");
+//            for (GraphicsPlayer player : players) {
+//                player.getHand()[0].setType(GraphicsCardType.SHOWN);
+//                player.getHand()[1].setType(GraphicsCardType.SHOWN);
+//            }
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//
+//
+//        revalidate();
+//
+//        repaint();
+//    }
+
+    public void addPlayer(UUID id, boolean self) {
+        GraphicsPlayer newGraphicsPlayer = new GraphicsPlayer(self);
+        graphicsPlayerMap.put(id, newGraphicsPlayer);
 
         Slot freeSlot = null;
         for (Slot slot : playerSlots) {
@@ -162,26 +172,35 @@ public class DrawPanel extends JPanel {
             }
         }
 
-        newPlayer.setSlot(freeSlot);
-        placePlayer(newPlayer);
+        newGraphicsPlayer.setSlot(freeSlot);
+        placePlayer(newGraphicsPlayer);
     }
 
     private void initToolbar() {
-        toolbar = new Toolbar();
         toolbar.setBounds(425, 705, toolbar.getWidth(), toolbar.getHeight());
         add(toolbar);
     }
 
     private void initCardsContainer() {
-        cardsContainer.setBounds(425, 320, cardsContainer.getWidth(), cardsContainer.getHeight());
+        cardsContainer.setBounds(425, 270, cardsContainer.getWidth(), cardsContainer.getHeight());
         add(cardsContainer);
     }
 
-    public void generatePlayers(int n) {
-        for (int i = 0; i < n; i++) {
-            Player gamePlayer = new Player("f", 4000, null);
-            gamePlayer.setHand(new Card[]{new Card(Rank.THREE, Suit.HEARTS), new Card(Rank.JACK, Suit.CLUBS)});
-            addPlayer(gamePlayer, true);
+    public void highlightButton(ToolbarButton button) {
+        for (ToolbarButton button1 : toolbar.getButtons()) {
+            if (button1.equals(button)) {
+                button1.highlight();
+            } else {
+                button1.setBackground(DEFAULT_COLOR);
+                button1.setBorder(null);
+            }
+        }
+    }
+
+    public void resetHighlightButton() {
+        for (ToolbarButton button1 : toolbar.getButtons()) {
+            button1.setBackground(DEFAULT_COLOR);
+            button1.setBorder(null);
         }
     }
 

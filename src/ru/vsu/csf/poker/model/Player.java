@@ -3,6 +3,7 @@ package ru.vsu.csf.poker.model;
 import ru.vsu.csf.poker.enums.PlayerState;
 import ru.vsu.csf.poker.interfaces.GameUI;
 import ru.vsu.csf.poker.interfaces.PlayerActions;
+import ru.vsu.csf.poker.server.ClientHandler;
 
 import java.util.*;
 
@@ -10,12 +11,14 @@ import static ru.vsu.csf.poker.Main.rb;
 
 public class Player implements PlayerActions, Comparable<Player> {
 
-    private String yourTurn = rb.getString("yourTurn");
-    private String invalidInput = rb.getString("invalidInput");
-    private String dontCall = rb.getString("dontCall");
-    private String dontCheck = rb.getString("dontCheck");
-    private String notEnoughCash = rb.getString("notEnoughCash");
-    private String betLessThanLast = rb.getString("betLessThanLast");
+    private final String yourTurn = rb.getString("yourTurn");
+    private final String invalidInput = rb.getString("invalidInput");
+    private final String dontCall = rb.getString("dontCall");
+    private final String dontCheck = rb.getString("dontCheck");
+    private final String notEnoughCash = rb.getString("notEnoughCash");
+    private final String betLessThanLast = rb.getString("betLessThanLast");
+
+    private final ClientHandler clientHandler;
 
     protected String name;
     protected int cash;
@@ -30,11 +33,16 @@ public class Player implements PlayerActions, Comparable<Player> {
     private final CombinationDeterminator cd = new CombinationDeterminator(this, this.table);
     protected GameUI ui;
 
-    public Player(String name, int cash, Table table, GameUI ui) {
+    public Player(String name, int cash, Table table, GameUI ui, ClientHandler clientHandler) {
         this.name = name;
         this.cash = cash;
         this.table = table;
         this.ui = ui;
+        this.clientHandler = clientHandler;
+    }
+
+    public Player(String name, int cash, Table table, GameUI ui) {
+        this(name, cash, table, ui, null);
     }
 
     public Player(String name, int cash, Table table) {
@@ -79,7 +87,7 @@ public class Player implements PlayerActions, Comparable<Player> {
     }
 
     public void makeMove() {
-        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
+//        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
         Move move = ui.prompt(yourTurn + ": ");
         while (move == null) {
             move = ui.prompt(invalidInput);
@@ -117,6 +125,7 @@ public class Player implements PlayerActions, Comparable<Player> {
                 } else if (newBet <= table.getCurrentBet()) {
                     ui.showMessage(betLessThanLast);
                     raise(table.getCurrentBet() + 100);
+                    return;
                 }
                 raise(newBet);
             }

@@ -1,5 +1,7 @@
 package ru.vsu.csf.poker.graphics;
 
+import ru.vsu.csf.poker.event.TableEvent;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

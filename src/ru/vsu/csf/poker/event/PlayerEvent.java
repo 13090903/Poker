@@ -6,7 +6,6 @@ import ru.vsu.csf.poker.model.Player;
 import java.util.UUID;
 
 public class PlayerEvent {
-    //todo: то же виннеров сделать, мув к строке
     private UUID id;
     private String name;
     private final int cash;

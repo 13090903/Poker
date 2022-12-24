@@ -3,6 +3,7 @@ package ru.vsu.csf.poker.graphics;
 import ru.vsu.csf.poker.enums.GraphicsCardType;
 import ru.vsu.csf.poker.event.PlayerEvent;
 import ru.vsu.csf.poker.event.TableEvent;
+import ru.vsu.csf.poker.event.WinnerEvent;
 import ru.vsu.csf.poker.graphics.components.ToolbarButton;
 import ru.vsu.csf.poker.model.*;
 
@@ -29,7 +30,9 @@ public class DrawPanel extends JPanel {
     private final JLabel bankLabel = new JLabel();
     private final JLabel currentBetLabel = new JLabel();
     private final JLabel winnersLabel = new JLabel();
+    private final JLabel combsLabel = new JLabel();
     private final JTextArea raiseBet = new JTextArea();
+    private Object lock;
 
     public static class Slot {
         private final int x, y;
@@ -67,16 +70,25 @@ public class DrawPanel extends JPanel {
         bankLabel.setBounds(1000, 300, 300, 50);
         currentBetLabel.setBounds(1000, 350, 300, 50);
         winnersLabel.setBounds(25, 275, 350, 150);
+        combsLabel.setBounds(25, 325, 350, 150);
         raiseBet.setBounds(1000, 720, 100, 30);
-        winnersLabel.setFont(new Font("Times", Font.BOLD, 30));
+        winnersLabel.setFont(new Font("Times", Font.BOLD, 17));
+        combsLabel.setFont(new Font("Times", Font.BOLD, 17));
         raiseBet.setFont(DEFAULT_FONT);
         winnersLabel.setForeground(Color.BLUE);
+        combsLabel.setForeground(Color.BLUE);
         bankLabel.setFont(DEFAULT_FONT);
         currentBetLabel.setFont(DEFAULT_FONT);
         add(winnersLabel);
+        add(combsLabel);
         add(bankLabel);
         add(currentBetLabel);
         add(raiseBet);
+    }
+
+    public Move askPlayer() {
+        resetHighlightButton();
+        return toolbar.waitForMove();
     }
 
 //    private void initBotGame(int n) {
@@ -130,6 +142,34 @@ public class DrawPanel extends JPanel {
 
         revalidate();
         repaint();
+    }
+
+    public void updateWinners(WinnerEvent e) {
+        StringBuilder sb = new StringBuilder();
+        for (String name : e.getWinnersNames()) {
+            sb.append(name).append(" ");
+        }
+        winnersLabel.setText(winnersText + ": " + sb);
+        combsLabel.setText(withCombText + ": " + e.getCombination());
+
+        revalidate();
+        repaint();
+    }
+
+    public void showCards() {
+        for (Map.Entry<UUID, GraphicsPlayer> k : graphicsPlayerMap.entrySet()) {
+            if (k.getValue().getHand()[0] != null) {
+                k.getValue().getHand()[1].setType(GraphicsCardType.SHOWN);
+                k.getValue().getHand()[0].setType(GraphicsCardType.SHOWN);
+            }
+
+        }
+
+    }
+
+    public void resetWinners() {
+        winnersLabel.setText("");
+        combsLabel.setText("");
     }
 
 //    private void update() {

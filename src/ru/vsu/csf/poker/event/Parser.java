@@ -1,8 +1,11 @@
 package ru.vsu.csf.poker.event;
 
+import ru.vsu.csf.poker.enums.Combinations;
+import ru.vsu.csf.poker.enums.MoveType;
 import ru.vsu.csf.poker.enums.Rank;
 import ru.vsu.csf.poker.enums.Suit;
 import ru.vsu.csf.poker.model.Card;
+import ru.vsu.csf.poker.model.Move;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +48,25 @@ public class Parser {
     public static Card parseCard(String s) {
         String[] str = s.split("_");
         return new Card(Rank.valueOf(str[0], -1), Suit.valueOf(str[1], -1));
+    }
+
+    public static WinnerEvent parseWinnerEvent(String s) {
+        String[] arr = s.split("\\|");
+        Combinations comb = Combinations.valueOf(arr[1], -1);
+        String[] arr1 = arr[0].split(" ");
+        List<String> winnersNames = new ArrayList<>(Arrays.asList(arr1));
+        return new WinnerEvent(winnersNames, comb);
+    }
+
+    public static Move parseMove(String s) {
+        Move move;
+        String[] arr = s.split(",");
+        if (arr.length == 1) {
+            move = new Move(MoveType.valueOf(arr[0].toUpperCase()));
+        } else {
+            move = new Move(MoveType.valueOf(arr[0].toUpperCase()), Integer.parseInt(arr[1]));
+        }
+        return move;
     }
 
 }

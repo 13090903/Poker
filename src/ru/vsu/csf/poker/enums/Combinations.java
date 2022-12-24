@@ -1,5 +1,7 @@
 package ru.vsu.csf.poker.enums;
 
+import java.util.Objects;
+
 import static ru.vsu.csf.poker.Main.rb;
 
 public enum Combinations{
@@ -29,5 +31,14 @@ public enum Combinations{
     @Override
     public String toString() {
         return name;
+    }
+
+    public static Combinations valueOf(String s, int dummy) {
+        for (Combinations c : values()) {
+            if (Objects.equals(c.name, s)) {
+                return c;
+            }
+        }
+        return null;
     }
 }

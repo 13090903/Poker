@@ -6,6 +6,8 @@ import ru.vsu.csf.poker.model.Move;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +17,7 @@ public class Toolbar extends JComponent {
     private ToolbarButton fold, call, check, raise;
     private final List<ToolbarButton> myButtons = new ArrayList<>();
     private final DrawPanel panel;
+    private Move move;
 
     public Toolbar(DrawPanel panel) {
         this.panel = panel;
@@ -50,6 +53,17 @@ public class Toolbar extends JComponent {
 
         repaint();
 
+        for (ToolbarButton button : myButtons) {
+            button.addActionListener(e -> {
+                synchronized (this) {
+                    recountRaiseBet();
+                    panel.highlightButton((ToolbarButton) e.getSource());
+                    move = button.getMoveType();
+                    this.notifyAll();
+                }
+            });
+        }
+
     }
 
     @Override
@@ -64,6 +78,18 @@ public class Toolbar extends JComponent {
 
     public void recountRaiseBet() {
         raise.setMoveType(new Move(MoveType.RAISE, panel.getRaiseBet().getText().equals("") ? 100 : Integer.parseInt(panel.getRaiseBet().getText())));
+    }
+
+    public Move waitForMove() {
+        move = null;
+        synchronized (this) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return move;
     }
 
     public List<ToolbarButton> getButtons() {

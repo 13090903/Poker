@@ -1,5 +1,8 @@
 package ru.vsu.csf.poker.server;
 
+import ru.vsu.csf.poker.event.Parser;
+import ru.vsu.csf.poker.graphics.DrawPanel;
+import ru.vsu.csf.poker.graphics.GraphicsGameUI;
 import ru.vsu.csf.poker.model.Game;
 import ru.vsu.csf.poker.model.Move;
 import ru.vsu.csf.poker.model.Player;
@@ -18,11 +21,13 @@ public class ClientHandler {
     private BufferedReader in;
     private PrintWriter out;
 
+    private Move receivedMove;
+
     public ClientHandler(Socket socket, Game game) {
         try {
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out = new PrintWriter(socket.getOutputStream(), true);
-            id = game.addPlayer(new Player("Player" + game.getPlayers().size(), 5000, null));
+            id = game.addPlayer(new Player("Player" + game.getPlayers().size(), 5000, null, null,this));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -31,7 +36,9 @@ public class ClientHandler {
             try {
                 while (true) {
                     String s = in.readLine();
-                    switch (s) {
+                    String[] arr = s.split(":");
+                    String command = arr[0];
+                    switch (command) {
                         case "PI" -> {
                             StringBuilder playersIds = new StringBuilder();
                             for (Player player : game.getPlayers()) {
@@ -45,6 +52,12 @@ public class ClientHandler {
                         case "PS" -> out.println("PS:" + game.getPlayers().size());
                         case "R" -> ready = true;
                         case "MyID" -> out.println("MyID:" + id);
+                        case "Move" -> {
+                            synchronized (this) {
+                                receivedMove = Parser.parseMove(arr[1]);
+                                this.notifyAll();
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -54,7 +67,15 @@ public class ClientHandler {
     }
 
     public Move requestMove() {
-
+        send("Move:");
+        synchronized (this) {
+            try {
+                this.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        return receivedMove;
     }
 
     public boolean ready() {

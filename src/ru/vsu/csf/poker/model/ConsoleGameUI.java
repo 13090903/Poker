@@ -31,7 +31,7 @@ public class ConsoleGameUI implements GameUI {
     }
 
     @Override
-    public Move prompt() {
+    public Move ask() {
         String[] input = in.nextLine().split(" ");
         String typeStr = input[0];
         switch (typeStr) {

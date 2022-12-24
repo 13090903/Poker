@@ -1,6 +1,7 @@
 package ru.vsu.csf.poker.model;
 
 import ru.vsu.csf.poker.enums.PlayerState;
+import ru.vsu.csf.poker.graphics.DrawPanel;
 import ru.vsu.csf.poker.interfaces.GameUI;
 import ru.vsu.csf.poker.interfaces.PlayerActions;
 import ru.vsu.csf.poker.server.ClientHandler;
@@ -17,7 +18,6 @@ public class Player implements PlayerActions, Comparable<Player> {
     private final String dontCheck = rb.getString("dontCheck");
     private final String notEnoughCash = rb.getString("notEnoughCash");
     private final String betLessThanLast = rb.getString("betLessThanLast");
-
     private final ClientHandler clientHandler;
 
     protected String name;
@@ -87,11 +87,11 @@ public class Player implements PlayerActions, Comparable<Player> {
     }
 
     public void makeMove() {
-//        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
-        Move move = ui.prompt(yourTurn + ": ");
-        while (move == null) {
-            move = ui.prompt(invalidInput);
+        if (clientHandler == null) {
+            throw new RuntimeException("Player has no clientHandler");
         }
+
+        Move move = clientHandler.requestMove();
 
         switch (move.getMoveType()) {
             case CALL -> {
@@ -101,7 +101,7 @@ public class Player implements PlayerActions, Comparable<Player> {
                 if (bet < table.getCurrentBet() || bet > table.getCurrentBet()) {
                     call();
                 } else {
-                    ui.showMessage(dontCall);
+//                    ui.showMessage(dontCall);
                     check();
                 }
             }
@@ -109,7 +109,7 @@ public class Player implements PlayerActions, Comparable<Player> {
                 if (bet == table.getCurrentBet()) {
                     check();
                 } else {
-                    ui.showMessage(dontCheck);
+//                    ui.showMessage(dontCheck);
                     call();
                 }
             }
@@ -130,7 +130,7 @@ public class Player implements PlayerActions, Comparable<Player> {
                 raise(newBet);
             }
         }
-        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
+//        ui.showGameState(bet, table.getCurrentBet(), table.getBank());
     }
 
     public void checkCombination() {

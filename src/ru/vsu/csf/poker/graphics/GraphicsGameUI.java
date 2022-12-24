@@ -14,7 +14,7 @@ public class GraphicsGameUI implements GameUI {
     }
 
     @Override
-    public Move prompt() {
+    public Move ask() {
         move = null;
         panel.resetHighlightButton();
         for (ToolbarButton button : panel.getToolbar().getButtons()) {

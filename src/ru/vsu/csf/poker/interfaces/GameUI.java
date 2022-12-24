@@ -1,18 +1,16 @@
 package ru.vsu.csf.poker.interfaces;
 
-import ru.vsu.csf.poker.graphics.DrawPanel;
 import ru.vsu.csf.poker.model.Card;
 import ru.vsu.csf.poker.model.Move;
-import ru.vsu.csf.poker.model.Player;
 import ru.vsu.csf.poker.model.Table;
 
 public interface GameUI {
-    default Move prompt(String message) {
+    default Move ask(String message) {
         showMessage(message);
-        return prompt();
+        return ask();
     }
 
-    Move prompt();
+    Move ask();
 
     void showGameState(int playerBet, int currBet, int bank);
 

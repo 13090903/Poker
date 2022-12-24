@@ -2,8 +2,10 @@ package ru.vsu.csf.poker.server;
 
 import ru.vsu.csf.poker.event.PlayerEvent;
 import ru.vsu.csf.poker.event.TableEvent;
+import ru.vsu.csf.poker.event.WinnerEvent;
 import ru.vsu.csf.poker.model.Bot;
 import ru.vsu.csf.poker.model.Game;
+import ru.vsu.csf.poker.model.GameCallBackObj;
 import ru.vsu.csf.poker.model.Player;
 
 import java.io.BufferedReader;
@@ -23,22 +25,15 @@ public class Server {
     public Server() {
         game = new Game();
 
-        for (int i = 0; i < 3; i++) {
-            Bot bot = new Bot("Bot" + i, 4000, null);
-            game.addPlayer(bot);
-        }
-
-        new Thread(game::start).start();
-
         game.setCallback(obj -> {
-            if (!obj.moveDone) {
+            if (obj.type == GameCallBackObj.Type.MOVE && !obj.moveDone) {
                 for (ClientHandler c : clientHandlers) {
                     if (!c.ready()) {
                         continue;
                     }
                     c.send("H:" + obj.id);
                 }
-            } else {
+            } else if (obj.moveDone) {
                 for (ClientHandler c : clientHandlers) {
                     if (!c.ready()) {
                         continue;
@@ -48,12 +43,38 @@ public class Server {
                     TableEvent tableEvent = new TableEvent(game.getTable());
                     c.send("PTU:" + playerEvent + "|" + tableEvent);
                 }
+            } else if (obj.type == GameCallBackObj.Type.WIN) {
+                for (ClientHandler c : clientHandlers) {
+                    WinnerEvent winnerEvent = new WinnerEvent(game.getRoundWinners());
+                    c.send("WU:" + winnerEvent);
+                    if (game.getPlayerByID(obj.id) != null) {
+                        Player player = game.getPlayerByID(obj.id);
+                        PlayerEvent playerEvent = new PlayerEvent(player);
+                        TableEvent tableEvent = new TableEvent(game.getTable());
+                        c.send("PTU:" + playerEvent + "|" + tableEvent);
+                    }
+                }
+
+            } else {
+                for (ClientHandler c : clientHandlers) {
+                    c.send("New:" + obj.id);
+                }
             }
         });
+
+        for (int i = 0; i < 3; i++) {
+            Bot bot = new Bot("Bot" + i, 4000, null);
+            game.addPlayer(bot);
+        }
+
+        new Thread(game::start).start();
 
         try {
             ServerSocket server = new ServerSocket(9999);
             while (true) {
+                if (game.getPlayers().size() >= 6) {
+                    return;
+                }
                 System.out.println("Server waiting for clients...");
                 Socket socket = server.accept();
                 System.out.println("Client connected.");

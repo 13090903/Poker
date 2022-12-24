@@ -22,4 +22,15 @@ public class Move {
     public int getRaiseValue() {
         return raiseValue;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (moveType != MoveType.RAISE) {
+            sb.append(moveType);
+        } else {
+            sb.append(moveType).append(",").append(raiseValue);
+        }
+        return sb.toString();
+    }
 }

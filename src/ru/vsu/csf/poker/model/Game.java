@@ -23,7 +23,8 @@ public class Game {
     private List<Player> roundWinners = new ArrayList<>();
     private boolean isRoundGoing;
 
-    protected Table table = new Table();;
+    protected Table table = new Table();
+    ;
     private WinnerDeterminator wd;
 
     public void setCallback(Consumer<GameCallBackObj> callback) {
@@ -101,7 +102,6 @@ public class Game {
                 break;
             }
             for (int i = 0; i < players.size(); i++) {
-                System.out.println(players.size());
                 if (players.get(i).getState().equals(PlayerState.FOLD) || players.get(i).cash <= 0) {
                     continue;
                 }
@@ -219,9 +219,13 @@ public class Game {
                 }
             }
         }
+        List<UUID> winnersID = new ArrayList<>();
+        for (Player player : roundWinners) {
+            winnersID.add(player.getId());
+        }
 
         if (callback != null) {
-            callback.accept(new GameCallBackObj(roundWinners));
+            callback.accept(new GameCallBackObj(winnersID, roundWinners.get(0).combination.combination));
         }
 
         for (Player player : players) {
@@ -242,9 +246,11 @@ public class Game {
     public UUID addPlayer(Player player) {
         if (!isRoundGoing) {
             players.add(player);
+
         } else {
             waitingPlayers.add(player);
         }
+        callback.accept(new GameCallBackObj(player.getId()));
         return player.getId();
     }
 
